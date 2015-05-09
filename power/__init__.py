@@ -1,6 +1,6 @@
 __author__ = 'stevet'
 
-from Threading inport Lock
+from threading import Lock
 
 
 class PowerTail(object):
