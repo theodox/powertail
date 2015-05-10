@@ -1,0 +1,7 @@
+{% block body %}
+  <table class=intervaltable>
+  {% for entry in entries%}
+     <tr><td>{{ entry.kid }}</td><td>{{ entry.day }}</td><td>{{ entry.on }}</td><td>{{ entry.off }}</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

@@ -30,3 +30,7 @@ class PowerTail(object):
         if self._state != self._internal_state:
             print "changing to", self._state
             self._internal_state = self._state
+
+
+class PowerManager(object):
+    pass

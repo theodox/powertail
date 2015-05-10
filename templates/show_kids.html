@@ -1,0 +1,7 @@
+{% block body %}
+  <table class=kidtable>
+  {% for kid in kids%}
+     <tr><td>{{ kid.kid }}</td><td>{{ kid.balance|safe }}</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

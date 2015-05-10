@@ -1,12 +1,10 @@
 import power
-import sqlite3
-from flask import Flask, request, session, g, redirect, url_for,  abort, render_template, flash
-from contextlib import closing
+from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 import sys
+from db import connect_db, init_db, display_time, allowed_now
 
 # configuration
 
-DATABASE = '/tmp/flaskr.db'
 DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'
@@ -16,21 +14,11 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 # todo: the above can be a separate file: see  http://flask.pocoo.org/docs/0.10/tutorial/setup/#tutorial-setup
 
-def init_db():
-    with closing(connect_db()) as db:
-        with app.open_resource('table.sql', mode='r') as f:
-            db.cursor().executescript(f.read())
-        db.commit()
-    print "new databse created"
-
-
-def connect_db():
-    return sqlite3.connect(app.config['DATABASE'])
-
 
 @app.before_request
 def before_request():
     g.db = connect_db()
+
 
 @app.teardown_request
 def teardown_request(exception):
@@ -38,13 +26,30 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
-
-
 @app.route('/')
-def show_entries():
-    cur = g.db.execute('select title, text from entries order by id desc')
-    entries = [dict(title=row[0], text=row[1]) for row in cur.fetchall()]
-    return render_template('show_entries.html', entries=entries)
+def temp():
+    return "Hello world"
+
+@app.route('/kids')
+def show_kids():
+    cur = g.db.execute('select name, balance from kids')
+    entries = [dict(kid=row[0], balance=row[1]) for row in cur.fetchall()]
+    return render_template('show_kids.html', kids=entries)
+
+
+@app.route('/intervals')
+def show_intervals():
+    cur = g.db.execute('select kids_name, day, turn_on, turn_off from intervals order by kids_name, day')
+    def row_fmt (row):
+        return {
+            'kid': row[0],
+            'day': row[1],
+            'on': display_time(row[2]),
+            'off': display_time(row[3])
+            }
+    entries = [row_fmt(row) for row in cur.fetchall()]
+    return render_template('show_intervals.html', entries=entries)
+
 
 @app.route('/add', methods=['POST'])
 def add_entry():
@@ -55,6 +60,7 @@ def add_entry():
     g.db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -70,15 +76,23 @@ def login():
             return redirect(url_for('show_entries'))
     return render_template('login.html', error=error)
 
+
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
 
+
+@app.route('/check')
+def check():
+    results = [allowed_now(k) for k in ('Nicky', 'Helen', 'Daddy', 'Al')]
+    return "<br/>".join([str(r) for r in results])
+
+
 if __name__ == '__main__':
     if sys.argv[-1] == '--setup':
-        init_db()
+        init_db(app)
         raise SystemExit(0)
 
     app.run()
