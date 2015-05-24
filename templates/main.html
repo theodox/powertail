@@ -12,8 +12,8 @@
     <a href="{{ url_for('logout') }}">log out</a>
   {% endif %}
   <table class=newstable>
-  {% for item in news%}
-     <tr><td>{{ item }}</td></tr>
+  {% for k, v in news.items()%}
+     <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
   {% endfor %}
   </table>
 </body>

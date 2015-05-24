@@ -1,7 +1,8 @@
 import power
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 import sys
-from db import connect_db, init_db, display_time, allowed_now
+from db import connect_db, init_db, display_time, current_interval
+import time
 
 # configuration
 
@@ -34,20 +35,20 @@ def teardown_request(exception):
 @app.route('/')
 def temp():
     news = []
-    while not manager.queue.empty():
-        news.append(str(manager.queue.get()))
 
-    news.append("loaded")
-    news.append(manager._kid or "logged out")
-    news.append(str(manager.state()))
-    news.append("%i minutes" % int(manager.get_remaining()))
+    user = manager._kid or "logged out"
+    state = "ON" if manager.state() else "OFF"
+    interval = current_interval(manager._kid)
+    remaining = int(min(interval.balance, interval.remaining))
+    clock = time.strftime("%I:%M %p")
+    news = dict(user=user, state = state, remaining = remaining, time = clock)
     return render_template('main.html', news=news)
     return "<br/>".join(news)
 
 
 @app.route('/history')
 def show_history():
-    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time')
+    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time LIMIT 100')
     entries = [dict(time=row[0], kid=row[1], msg=row[2]) for row in cur.fetchall()]
     return render_template('history.html', entries=entries)
 

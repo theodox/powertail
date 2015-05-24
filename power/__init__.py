@@ -4,7 +4,6 @@ from threading import Lock
 import sqlite3
 import time
 from threading import Thread, current_thread, RLock
-from Queue import Queue
 import  db
 
 class PowerTail(object):
@@ -32,8 +31,9 @@ class PowerTail(object):
 
     def enact(self):
         if self._state != self._internal_state:
-            print "changing to", self._state
             self._internal_state = self._state
+            with db.connect_db() as conn:
+                db.log(conn, "System", "POWER SET %s" % self._state)
             return self._internal_state
         return None
 
@@ -46,7 +46,6 @@ class PowerManager(object):
         self.db = self.DATABASE
         self.tail = PowerTail()
         self.stop = False
-        self.queue = Queue()
         self.lock = RLock()
         self._kid = None
         self.interval = interval
@@ -87,27 +86,25 @@ class PowerManager(object):
             self.app.logger.debug("(%s): being %s", current_thread(), self.get_user())
             user = self.get_user()
             db.replenish(user)
-            ok, reason = db.allowed_now(user)
+            interval = db.current_interval(user)
 
-            result = None
-            if ok:
+            ok = interval.balance > 0 and interval.remaining > 0
 
-                fraction = self.interval / 60.0
-                db.deduct(user, fraction)
-                self.set_remaining(db.remaining(user))
-                result = self.tail.on()
-            else:
-                result = self.tail.off()
+            msg = None
+            with db.connect_db() as conn:
+                if ok:
+                    fraction = self.interval / 60.0
+                    db.deduct(user, fraction)
+                    msg  = self.tail.on()
 
-            if result is not None:
-                with db.connect_db() as conn:
-                    db.log(conn, user, "power set to %s (%s) " % (result, reason))
-                    self.app.logger.debug("(%s) %s: %s (%s remaining)" %
-                                      (current_thread(), result, reason, self.get_remaining()))
+                else:
+                    msg = self.tail.off()
 
             time.sleep(self.interval)
 
         self.tail.off()
+        with db.connect_db() as conn:
+            conn.log("System", "shutting down")
         self.app.logger.critical("monitor thread stopping")
 
     def monitor(self):
