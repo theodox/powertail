@@ -1,0 +1,7 @@
+{% block body %}
+  <table class=historytable>
+  {% for entry in entries%}
+     <tr><td>{{ entry.time }}</td><td>{{ entry.kid }}</td><td>{{ entry.msg }}</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

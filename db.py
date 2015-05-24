@@ -24,7 +24,8 @@ def init_db(app):
         with app.open_resource('table.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-    print "new database created"
+        print "new database created"
+        log(db, 'System', 'database created')
 
 
 def connect_db():
@@ -94,4 +95,33 @@ def allowed_now(kid):
         start, end = results[0]
         if test < start or test > end:
             return False, "outside time"
-        return True, "OK"
+        return True, min (end-test, row[0])
+
+
+def replenish(kid):
+
+    if kid is None:
+        return False
+
+    with connect_db() as db:
+        repl = db.execute("SELECT replenished from kids WHERE name LIKE ? and DATE (replenished) <  DATE ('now')", (kid,))
+        recent = repl.fetchone()
+
+        if recent:
+            daynum = db.execute("SELECT strftime ('%w', 'now')").fetchone()[0]
+            daynum = int(daynum)
+            repl_amount = db.execute("SELECT sun, mon, tues, weds, thurs, fri, sat FROM replenish WHERE kids_name like ?", ( kid,))
+            refresh = repl_amount.fetchone()[daynum]
+            cap_amount = db.execute("SELECT cap, balance FROM kids WHERE name LIKE ?", (kid,))
+            cap, balance = cap_amount.fetchone()
+            new_balance = min(cap,refresh + balance )
+
+            db.execute("UPDATE kids SET balance = ? , replenished = DATE('now') WHERE name LIKE ?", (new_balance, kid))
+            log(db, kid, "replenished with %i credits" % new_balance)
+
+
+def log(connection, kid, message):
+    if not kid:
+        return
+    print "logging"
+    print connection.execute("INSERT INTO history (kids_name, event) VALUES (?,?)", (kid, message))

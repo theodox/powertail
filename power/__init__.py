@@ -53,7 +53,6 @@ class PowerManager(object):
         self.app = app
         self.started  = False
         self._remaining = 0
-        print "manager created"
 
     def get_remaining(self):
         with self.lock:
@@ -70,7 +69,11 @@ class PowerManager(object):
         with self.lock:
             self._kid = kid
         self.app.logger.critical("logged in %s", str(kid))
-
+        with db.connect_db() as conn:
+            if kid:
+                db.log(conn, kid, "logged in")
+            else:
+                db.log(conn, "System", "logged out")
 
     def get_user(self):
         with self.lock:
@@ -78,13 +81,15 @@ class PowerManager(object):
 
 
 
+
     def check(self):
         while not self.stop:
-            self.app.logger.critical("(%s): being %s", current_thread(), self.get_user())
+            self.app.logger.debug("(%s): being %s", current_thread(), self.get_user())
             user = self.get_user()
+            db.replenish(user)
             ok, reason = db.allowed_now(user)
-            result = None
 
+            result = None
             if ok:
 
                 fraction = self.interval / 60.0
@@ -95,9 +100,10 @@ class PowerManager(object):
                 result = self.tail.off()
 
             if result is not None:
-                self.queue.put(result, reason)
-                self.app.logger.critical("(%s) %s: %s (%s remaining)" % (current_thread(), result, reason, self.get_remaining()))
-
+                with db.connect_db() as conn:
+                    db.log(conn, user, "power set to %s (%s) " % (result, reason))
+                    self.app.logger.debug("(%s) %s: %s (%s remaining)" %
+                                      (current_thread(), result, reason, self.get_remaining()))
 
             time.sleep(self.interval)
 

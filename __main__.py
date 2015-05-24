@@ -14,8 +14,10 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 # todo: the above can be a separate file: see  http://flask.pocoo.org/docs/0.10/tutorial/setup/#tutorial-setup
 
-from  power import  PowerManager
+from  power import PowerManager
+
 manager = None
+
 
 @app.before_request
 def before_request():
@@ -28,6 +30,7 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+
 @app.route('/')
 def temp():
     news = []
@@ -37,27 +40,36 @@ def temp():
     news.append("loaded")
     news.append(manager._kid or "logged out")
     news.append(str(manager.state()))
-    news.append("%i minutes" % int(manager.get_remaining() * 60))
-    return render_template('main.html', news = news)
+    news.append("%i minutes" % int(manager.get_remaining()))
+    return render_template('main.html', news=news)
     return "<br/>".join(news)
+
+
+@app.route('/history')
+def show_history():
+    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time')
+    entries = [dict(time=row[0], kid=row[1], msg=row[2]) for row in cur.fetchall()]
+    return render_template('history.html', entries=entries)
 
 @app.route('/kids')
 def show_kids():
-    cur = g.db.execute('select name, balance from kids')
-    entries = [dict(kid=row[0], balance=row[1]) for row in cur.fetchall()]
+    cur = g.db.execute('select name, balance, cap, replenished from kids')
+    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3]) for row in cur.fetchall()]
     return render_template('show_kids.html', kids=entries)
 
 
 @app.route('/intervals')
 def show_intervals():
     cur = g.db.execute('select kids_name, day, turn_on, turn_off from intervals order by kids_name, day')
-    def row_fmt (row):
+
+    def row_fmt(row):
         return {
             'kid': row[0],
             'day': row[1],
             'on': display_time(row[2]),
             'off': display_time(row[3])
-            }
+        }
+
     entries = [row_fmt(row) for row in cur.fetchall()]
     return render_template('show_intervals.html', entries=entries)
 
@@ -82,7 +94,7 @@ def login():
 
         with connect_db() as conn:
             cur = conn.cursor()
-            cur.execute("SELECT name, password FROM kids WHERE name like ?", (name ,))
+            cur.execute("SELECT name, password FROM kids WHERE name like ?", (name,))
             results = cur.fetchall()
             if len(results) == 0:
                 error = "Invalid username"
@@ -90,7 +102,7 @@ def login():
                 error = "Invalid password"
             else:
                 session['logged_in'] = True
-                manager.set_user (name)
+                manager.set_user(name)
                 flash('You were logged in')
                 return redirect(url_for('temp'))
     return render_template('login.html', error=error)
