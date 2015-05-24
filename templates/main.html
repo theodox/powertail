@@ -3,8 +3,18 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>PowerTail</title>
+    <meta http-equiv="refresh" content="9">
 </head>
 <body>
-
+  {% if not session.logged_in %}
+    <a href="{{ url_for('login') }}">log in</a>
+  {% else %}
+    <a href="{{ url_for('logout') }}">log out</a>
+  {% endif %}
+  <table class=newstable>
+  {% for item in news%}
+     <tr><td>{{ item }}</td></tr>
+  {% endfor %}
+  </table>
 </body>
 </html>

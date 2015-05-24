@@ -23,8 +23,8 @@ create table intervals (
 );
 
 INSERT  into intervals('day','turn_on', 'turn_off', 'kids_name') VALUES
-  (7, 11.0, 24.0, 'Daddy'),
-  (6, 9.0, 21.0, 'Daddy'),
+  (7, 11.0, 24.1, 'Daddy'),
+  (6, 9.0, 24.1, 'Daddy'),
   (1, 18.0, 20.0, 'Daddy'),
   (6, 8, 14, 'Al'),
   (7, 8, 19, 'Al');

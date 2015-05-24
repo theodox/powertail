@@ -14,6 +14,8 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 # todo: the above can be a separate file: see  http://flask.pocoo.org/docs/0.10/tutorial/setup/#tutorial-setup
 
+from  power import  PowerManager
+manager = None
 
 @app.before_request
 def before_request():
@@ -28,7 +30,16 @@ def teardown_request(exception):
 
 @app.route('/')
 def temp():
-    return "Hello world"
+    news = []
+    while not manager.queue.empty():
+        news.append(str(manager.queue.get()))
+
+    news.append("loaded")
+    news.append(manager._kid or "logged out")
+    news.append(str(manager.state()))
+    news.append("%i minutes" % int(manager.get_remaining() * 60))
+    return render_template('main.html', news = news)
+    return "<br/>".join(news)
 
 @app.route('/kids')
 def show_kids():
@@ -66,22 +77,31 @@ def add_entry():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
-            session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_entries'))
+        name = request.form['username']
+        pwd = request.form['password']
+
+        with connect_db() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT name, password FROM kids WHERE name like ?", (name ,))
+            results = cur.fetchall()
+            if len(results) == 0:
+                error = "Invalid username"
+            elif results[0][1] != pwd:
+                error = "Invalid password"
+            else:
+                session['logged_in'] = True
+                manager.set_user (name)
+                flash('You were logged in')
+                return redirect(url_for('temp'))
     return render_template('login.html', error=error)
 
 
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    manager.set_user(None)
     flash('You were logged out')
-    return redirect(url_for('show_entries'))
+    return redirect(url_for('temp'))
 
 
 @app.route('/check')
@@ -94,5 +114,8 @@ if __name__ == '__main__':
     if sys.argv[-1] == '--setup':
         init_db(app)
         raise SystemExit(0)
-
-    app.run()
+    else:
+        print "starting"
+        manager = PowerManager.manager(app)
+        manager.monitor()
+        app.run()
