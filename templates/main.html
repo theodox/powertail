@@ -1,20 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
+{% extends "layout.html" %}
+{% block head %}
     <title>PowerTail</title>
     <meta http-equiv="refresh" content="9">
-</head>
-<body>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
+{% endblock %}
+{% block body %}
   <table class=newstable>
   {% for k, v in news.items()%}
      <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
   {% endfor %}
   </table>
-</body>
-</html>
+{% endblock %}

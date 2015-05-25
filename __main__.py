@@ -23,6 +23,7 @@ manager = None
 @app.before_request
 def before_request():
     g.db = connect_db()
+    g.g_time = time.strftime("%I:%M %p")
 
 
 @app.teardown_request
@@ -33,7 +34,7 @@ def teardown_request(exception):
 
 
 @app.route('/')
-def temp():
+def front_page():
     news = []
 
     user = manager._kid or "logged out"
@@ -42,8 +43,9 @@ def temp():
     remaining = int(min(interval.balance, interval.remaining))
     clock = time.strftime("%I:%M %p")
     news = dict(user=user, state = state, remaining = remaining, time = clock)
+    if state == "ON":
+        flash("tv is on")
     return render_template('main.html', news=news)
-    return "<br/>".join(news)
 
 
 @app.route('/history')
@@ -62,11 +64,11 @@ def show_kids():
 @app.route('/intervals')
 def show_intervals():
     cur = g.db.execute('select kids_name, day, turn_on, turn_off from intervals order by kids_name, day')
-
+    day_names = 'Sun Mon Tues Weds Thur Fr Sat'.split()
     def row_fmt(row):
         return {
             'kid': row[0],
-            'day': row[1],
+            'day': day_names[row[1]-1],
             'on': display_time(row[2]),
             'off': display_time(row[3])
         }
@@ -105,7 +107,7 @@ def login():
                 session['logged_in'] = True
                 manager.set_user(name)
                 flash('You were logged in')
-                return redirect(url_for('temp'))
+                return redirect(url_for('front_page'))
     return render_template('login.html', error=error)
 
 
@@ -114,12 +116,12 @@ def logout():
     session.pop('logged_in', None)
     manager.set_user(None)
     flash('You were logged out')
-    return redirect(url_for('temp'))
+    return redirect(url_for('front_page'))
 
 
 @app.route('/check')
 def check():
-    results = [allowed_now(k) for k in ('Nicky', 'Helen', 'Daddy', 'Al')]
+    results = [current_interval(k) for k in ('Nicky', 'Helen', 'Daddy', 'Al')]
     return "<br/>".join([str(r) for r in results])
 
 

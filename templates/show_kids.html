@@ -1,4 +1,5 @@
-{% block body %}
+{% extends "layout.html" %}
+% block body %}
   <table class=kidtable>
   {% for kid in kids%}
      <tr><td>{{ kid.kid }}</td><td>{{ kid.balance|safe }}</td><td>{{ kid.cap }}</td><td>{{ kid.replenished }}</td></tr>
