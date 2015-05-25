@@ -50,8 +50,8 @@ def front_page():
 
 @app.route('/history')
 def show_history():
-    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time LIMIT 100')
-    entries = [dict(time=row[0], kid=row[1], msg=row[2]) for row in cur.fetchall()]
+    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time DESC LIMIT 100')
+    entries = [dict(time=row[0][5:-3], kid=row[1], msg=row[2]) for row in cur.fetchall()]
     return render_template('history.html', entries=entries)
 
 @app.route('/kids')
@@ -121,9 +121,11 @@ def logout():
 
 @app.route('/check')
 def check():
-    results = [current_interval(k) for k in ('Nicky', 'Helen', 'Daddy', 'Al')]
-    return "<br/>".join([str(r) for r in results])
-
+    results = dict()
+    for k in ('Nicky', 'Helen', 'Daddy', 'Al'):
+        interval = current_interval(k)
+        results[k] = interval
+    return render_template('checks.html', entries = results)
 
 if __name__ == '__main__':
     if sys.argv[-1] == '--setup':

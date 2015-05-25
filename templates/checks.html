@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+    {% for kid, entry in entries.items() %}
+        {% if entry.start > -1 %}
+
+            <hr/>
+            <h2>{{ kid }}</h2>
+            <table>
+                <tr>
+                    <td>start</td>
+                    <td>{{ entry.start }}</td>
+                </tr>
+                <tr>
+                    <td>end</td>
+                    <td>{{ entry.end }}</td>
+                </tr>
+                <tr>
+                    <td>time</td>
+                    <td>{{ entry.balance }}</td>
+                </tr>
+                <tr>
+                    <td>available</td>
+                    <td>{{ entry.remaining }}</td>
+                </tr>
+            </table>
+        {% endif %}
+
+    {% endfor %}
+{% endblock %}

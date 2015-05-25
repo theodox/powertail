@@ -38,7 +38,7 @@ DROP TABLE IF EXISTS history;
 CREATE TABLE history
 (
   id integer PRIMARY KEY AUTOINCREMENT ,
-  time SQLTIME DATETIME DEFAULT CURRENT_TIMESTAMP,
+  time  DATETIME DEFAULT (datetime('now','localtime')),
   event TEXT NOT NULL,
   kids_name TEXT,
   FOREIGN KEY (kids_name) REFERENCES kids (name)
@@ -67,9 +67,9 @@ INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
   (5, 14.5, 16.5, 'Nicky'),
   (6, 8, 21, 'Nicky'),
   (7, 8, 21, 'Nicky'),
-  (5, 14.5, 20, 'Al'),
-  (6, 8, 21, 'Al'),
+  (6, 14.5, 20, 'Al'),
   (7, 8, 21, 'Al'),
+  (1, 8, 21, 'Al'),
   (1, 8, 24, 'Daddy'),
   (2, 8, 24, 'Daddy'),
   (3, 8, 24, 'Daddy'),
