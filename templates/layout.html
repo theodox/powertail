@@ -5,9 +5,12 @@
   <h1>TV Control</h1>
     The time is now {{ g.g_time }}
   <div class=metanav>
+
   <a href="{{ url_for('show_history') }}">history</a>
   <a href="{{ url_for('show_intervals') }}">schedule</a>
   <a href="{{ url_for('check') }}">check</a>
+  <a href="{{ url_for('donate') }}">add</a>
+
   {% if not session.logged_in %}
     <a href="{{ url_for('login') }}">log in</a>
   {% else %}

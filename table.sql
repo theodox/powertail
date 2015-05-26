@@ -50,7 +50,7 @@ INSERT INTO kids ('name', 'password', 'balance', 'cap') VALUES
   ('Al', 'al', 0, 360),
   ('Daddy', 'dad', 0, 240),
   ('Guest', 'guest', 0, 60),
-  ('System', 'system', 0,0);
+  ('System', 'va4uvu', 0,0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
   (1, 14.5, 16.5, 'Helen'),

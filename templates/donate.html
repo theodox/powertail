@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Add Time</h2>
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    <form method="post" action="donate">
+        <dl>
+            <dt>Add time</dt>
+            <dd>
+                Give
+
+                <select name="amount">
+                    <option value="5">5 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hour</option>
+
+                </select>
+                to
+                <select name="child">
+                    {% for child in children %}
+                        <option value="{{ child }}">{{ child }}</option>
+                    {% endfor %}
+                </select>
+            </dd>
+        </dl>
+        <dl>
+            <dt>Password:
+            <dd><input type=password name=password>
+            <dd><input type=submit value=Login>
+        </dl>
+    </form>
+{% endblock %}

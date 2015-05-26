@@ -95,6 +95,18 @@ def replenish(kid):
             db.execute("UPDATE kids SET balance = ? , replenished = DATE('now') WHERE name LIKE ?", (new_balance, kid))
             log(db, kid, "replenished with %i credits" % new_balance)
 
+def add_credits(kid, amount):
+    if kid is None:
+        return False
+
+    with connect_db() as db:
+        cap_amount = db.execute("SELECT cap, balance FROM kids WHERE name LIKE ?", (kid,))
+        cap, balance = cap_amount.fetchone()
+        new_balance = min(cap, amount + balance)
+
+        db.execute("UPDATE kids SET balance = ? WHERE name LIKE ?", (new_balance, kid))
+        log(db, kid, "added %i credits" % amount)
+
 
 def log(connection, kid, message):
     if not kid:
