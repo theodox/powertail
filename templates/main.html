@@ -1,10 +1,9 @@
 {% extends "layout.html" %}
 {% block head %}
     <title>PowerTail</title>
-    <meta http-equiv="refresh" content="1">
 {% endblock %}
 {% block body %}
-  <table class=newstable>
+  <table class=main_info>
   {% for k, v in news.items()%}
      <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
   {% endfor %}

@@ -1,8 +1,11 @@
 <!doctype html>
 <title>Flaskr</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<head>
+        <meta http-equiv="refresh" content="4">
+</head>
 <div class=page>
-  <h1>TV Control</h1>
+  <h1>TV Control {{ session.username }}</h1>
     The time is now {{ g.g_time }}
   <div class=metanav>
 

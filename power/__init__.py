@@ -42,7 +42,7 @@ class PowerManager(object):
     DATABASE = '/tmp/flaskr.db'
     INSTANCE = None
 
-    def __init__(self, app, interval = 10):
+    def __init__(self, app, interval = 1.5):
         self.db = self.DATABASE
         self.tail = PowerTail()
         self.stop = False

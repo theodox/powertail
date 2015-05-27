@@ -108,6 +108,7 @@ def login():
                 error = "Invalid password"
             else:
                 session['logged_in'] = True
+                session['username'] = name
                 manager.set_user(name)
                 flash('You were logged in')
                 return redirect(url_for('front_page'))
@@ -132,6 +133,7 @@ def direct(username):
                 error = "Invalid password"
             else:
                 session['logged_in'] = True
+                session['username'] = name
                 manager.set_user(name)
                 flash('You were logged in')
                 return redirect(url_for('front_page'))
@@ -168,6 +170,7 @@ def donate(username=None):
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
+    session.pop('username')
     manager.set_user(None)
     flash('You were logged out')
     return redirect(url_for('front_page'))
