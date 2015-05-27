@@ -19,11 +19,12 @@ from  power import PowerManager
 
 manager = None
 
-
 @app.before_request
 def before_request():
     g.db = connect_db()
     g.g_time = time.strftime("%I:%M %p")
+    known_logins = g.db.execute('SELECT name FROM kids WHERE name != "System"').fetchall()
+    g.logins = [i[0] for i in known_logins]
 
 
 @app.teardown_request
@@ -187,6 +188,7 @@ if __name__ == '__main__':
         raise SystemExit(0)
     else:
         print "starting"
+
         manager = PowerManager.manager(app)
         manager.monitor()
         app.run(host=('0.0.0.0'))

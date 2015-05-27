@@ -20,5 +20,12 @@
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>
   {% endfor %}
+
   {% block body %}{% endblock %}
+
+<div id="login_pics">
+  {% for eachuser in g.logins%}
+     <a href="{{ url_for('direct', username=eachuser) }}">{{ eachuser }}</a>
+  {% endfor %}
+</div>
 </div>
