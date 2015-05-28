@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Weekly Schedule for {{ username }}</h2>
+    maximum minutes = {{ cap }}
+  <table class=intervaltable>
+  <tr><th>day</th><th>add</th><th>start</th><th>end</th></tr>
+  {% for entry in entries%}
+     <tr><td>{{ entry.day }}</td><td>{{entry.add}}</td><td>{{ entry.on }}</td><td>{{ entry.off }}</td></tr>
+  {% endfor %}
+  </table>
+{% endblock %}

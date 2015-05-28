@@ -2,7 +2,7 @@
 <title>Flaskr</title>
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
 <head>
-        <meta http-equiv="refresh" content="4">
+      {% block head %}{% endblock %}
 </head>
 <div class=page>
   <h1>TV Control {{ session.username }}</h1>
@@ -10,8 +10,9 @@
   <div class=metanav>
 
   <a href="{{ url_for('show_history') }}">history</a>
-  <a href="{{ url_for('show_intervals') }}">schedule</a>
-  <a href="{{ url_for('check') }}">check</a>
+  <a href="{{ url_for('today') }}">today</a>
+  <a href="{{ url_for('overall_schedule') }}">schedule</a>
+  <a href="{{ url_for('users') }}">users</a>
   <a href="{{ url_for('donate') }}">add</a>
 
   {% if not session.logged_in %}
@@ -28,7 +29,9 @@
 
 <div id="login_pics">
   {% for eachuser in g.logins%}
+      <div class = login_pic>
      <a href="{{ url_for('direct', username=eachuser) }}">{{ eachuser }}</a>
+      </div>
   {% endfor %}
 </div>
 </div>

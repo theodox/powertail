@@ -3,6 +3,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, render_t
 import sys
 from db import connect_db, init_db, display_time, current_interval, add_credits
 import time
+from collections import  OrderedDict
 
 # configuration
 
@@ -56,39 +57,31 @@ def show_history():
     return render_template('history.html', entries=entries)
 
 
-@app.route('/kids')
-def show_kids():
-    cur = g.db.execute('select name, balance, cap, replenished from kids')
+@app.route('/users')
+def users():
+    cur = g.db.execute('select name, balance, cap, replenished from kids WHERE name NOT  like "System"')
     entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3]) for row in cur.fetchall()]
     return render_template('show_kids.html', kids=entries)
 
 
-@app.route('/intervals')
-def show_intervals():
-    cur = g.db.execute('select kids_name, day, turn_on, turn_off from intervals order by kids_name, day')
-    day_names = 'Sun Mon Tues Weds Thur Fr Sat'.split()
+@app.route('/today')
+def today():
 
-    def row_fmt(row):
-        return {
-            'kid': row[0],
-            'day': day_names[row[1] - 1],
-            'on': display_time(row[2]),
-            'off': display_time(row[3])
-        }
-
-    entries = [row_fmt(row) for row in cur.fetchall()]
-    return render_template('show_intervals.html', entries=entries)
+    day_num = int(time.strftime("%w"))
+    results = dict()
+    users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
+    users = [k[0] for k in users]
+    for u in users:
+        cap, entries = get_schedule_for_user(u)
+        today = [e for e in entries if e['day_num'] == day_num]
+        if today:
+            results[u] = cap, today
 
 
-@app.route('/add', methods=['POST'])
-def add_entry():
-    if not session.get('logged_in'):
-        abort(401)
-    g.db.execute('insert into entries (title, text) values (?, ?)',
-                 [request.form['title'], request.form['text']])
-    g.db.commit()
-    flash('New entry was successfully posted')
-    return redirect(url_for('show_entries'))
+
+    return render_template('today.html', entries=results)
+
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -150,7 +143,7 @@ def donate(username=None):
         cur.execute("SELECT name FROM kids")
         all_kids = [i[0] for i in cur.fetchall()]
     if request.method == 'GET':
-        pass
+        return render_template('donate.html', error=error, children=(username,) )
     elif request.method == 'POST':
         with connect_db() as conn:
             cur = conn.cursor()
@@ -164,7 +157,46 @@ def donate(username=None):
             else:
                 error = 'Invalid password'
 
-    return render_template('donate.html', error=error, children=all_kids)
+        return render_template('donate.html', error=error, children=all_kids)
+
+
+def get_schedule_for_user(username):
+    cap = g.db.execute('select cap from kids WHERE name LIKE ?', (username,)).fetchone()[0]
+    replenish = g.db.execute('select * from replenish where kids_name LIKE ?', (username,))
+    repl = replenish.fetchone()[1:-1]
+    day_names = 'Sun Mon Tue Wed Thu Fri Sat'.split()
+    schedule = g.db.execute('select  day, turn_on, turn_off from intervals WHERE kids_name LIKE ? order by day',
+                            (username,))
+
+    def row_fmt(row):
+        day = row[0] - 1
+        return {
+            'day': day_names[day],
+            'on': display_time(row[1]),
+            'off': display_time(row[2]),
+            'add': repl[day],
+            'day_num': day
+        }
+
+    entries = [row_fmt(row) for row in schedule.fetchall()]
+    return cap, entries
+
+
+@app.route('/schedule')
+def overall_schedule():
+    results = dict()
+    users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
+    for k in users:
+        results[k[0]] = get_schedule_for_user(k[0])
+    return render_template('overall_schedule.html', entries=results)
+
+
+@app.route('/schedule/<username>')
+def get_schedule(username):
+
+    cap, entries = get_schedule_for_user(username)
+    return render_template('schedule.html', cap  = cap, entries=entries,username=username)
+
 
 
 @app.route('/logout')
@@ -175,14 +207,6 @@ def logout():
     flash('You were logged out')
     return redirect(url_for('front_page'))
 
-
-@app.route('/check')
-def check():
-    results = dict()
-    for k in ('Nicky', 'Helen', 'Daddy', 'Al'):
-        interval = current_interval(k)
-        results[k] = interval
-    return render_template('checks.html', entries=results)
 
 
 if __name__ == '__main__':
