@@ -2,18 +2,18 @@
 {% block body %}
     {% for kid, sched in entries.items() %}
         <div class="scheduleitem">
-        <h3> {{ kid }} <a href = "{{ url_for('donate', username=kid) }}">+</a><br/></h3>
-        max minutes = {{ sched[0] }}
-        {% for eachentry in sched[1] %}
-            <table class=intervaltable>
-                <tr>
-                    <td>{{ eachentry.day }}</td>
-                    <td>{{ eachentry.add }}</td>
-                    <td>{{ eachentry.on }}</td>
-                    <td>{{ eachentry.off }}</td>
-                </tr>
+            <h3> {{ kid }} <a href="{{ url_for('donate', username=kid) }}">+</a><br/></h3>
+            max minutes = {{ sched[0] }}
+            <table class=interval_table width="50%">
+                {% for eachentry in sched[1] %}
+                    <tr>
+                        <td>{{ eachentry.day }}</td>
+                        <td>{{ eachentry.add }}</td>
+                        <td>{{ eachentry.on | safe }}</td>
+                        <td>{{ eachentry.off | safe }}</td>
+                    </tr>
+                {% endfor %}
             </table>
-        {% endfor %}
         </div>
     {% endfor %}
 {% endblock %}

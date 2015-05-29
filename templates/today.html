@@ -1,20 +1,21 @@
 {% extends "layout.html" %}
 {% block body %}
-    {% for kid, sched in entries.items() %}
+    {% for kid,  sched in entries.items() %}
         <div class="scheduleitem">
-            <h3> {{ kid }} </h3>
-            Maximum minutes = {{ sched[0] }}
-            <a href="{{ url_for('donate', username=kid) }}"> add time</a>
-            {% for eachentry in sched[1] %}
-                <table class=intervaltable>
+        <h3> {{ kid }} </h3>
+        Time Available =  {{ sched[1] }} / {{ sched[0] }}
 
-                    <tr>
-                        <td>{{ eachentry.add }}</td>
-                        <td>{{ eachentry.on }}</td>
-                        <td>{{ eachentry.off }}</td>
+        <a href="{{ url_for('donate', username=kid) }}">+</a>
+        <table class="interval_table" width="50%">
+
+        {% for eachentry in sched[2] %}
+            <tr >
+                        <td>{{ eachentry.add | safe }}</td>
+                        <td>{{ eachentry.on |safe }}</td>
+                        <td>{{ eachentry.off | safe }}</td>
                     </tr>
-                </table>
             {% endfor %}
+                </table>
         </div>
     {% endfor %}
 {% endblock %}

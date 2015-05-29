@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <table class=kidtable>
+  <table class="user_table">
   <tr><th>user</th><th>balance</th><th>max</th><th>updated</th></tr>
   {% for kid in kids%}
      <tr><td><a href="{{ url_for('get_schedule', username=kid.kid)}}" >{{ kid.kid }}</a></td><td>{{ kid.balance|safe }}</td><td>{{ kid.cap }}</td><td>{{ kid.replenished }}</td></tr>

@@ -1,9 +1,10 @@
-import power
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 import sys
-from db import connect_db, init_db, display_time, current_interval, add_credits
 import time
-from collections import  OrderedDict
+
+from flask import Flask, request, session, g, redirect, url_for, render_template, flash
+
+from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt
+import datetime
 
 # configuration
 
@@ -11,6 +12,9 @@ DEBUG = True
 SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
+
+
+
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -61,21 +65,26 @@ def show_history():
 def users():
     cur = g.db.execute('select name, balance, cap, replenished from kids WHERE name NOT  like "System"')
     entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3]) for row in cur.fetchall()]
-    return render_template('show_kids.html', kids=entries)
+    return render_template('users.html', kids=entries)
 
 
 @app.route('/today')
 def today():
 
     day_num = int(time.strftime("%w"))
+    now = datetime.datetime.now()
+    test = now.hour + (now.minute / 60.0)
     results = dict()
     users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
     users = [k[0] for k in users]
     for u in users:
+        interval = current_interval(u)
         cap, entries = get_schedule_for_user(u)
         today = [e for e in entries if e['day_num'] == day_num]
+        for e in today:
+            e['valid'] = e['off_num'] > test
         if today:
-            results[u] = cap, today
+            results[u] = time_fmt(cap), time_fmt(interval.balance), today
 
 
 
@@ -175,7 +184,9 @@ def get_schedule_for_user(username):
             'on': display_time(row[1]),
             'off': display_time(row[2]),
             'add': repl[day],
-            'day_num': day
+            'day_num': day,
+            'on_num': row[1],
+            'off_num': row[2]
         }
 
     entries = [row_fmt(row) for row in schedule.fetchall()]

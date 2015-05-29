@@ -1,19 +1,153 @@
-body            { font-family: sans-serif; background: #eee; font-size: 16px}
-a, h1, h2       { color: #377ba8; }
-h1, h2          { font-family: 'Georgia', serif; margin: 0; }
-h1              { border-bottom: 2px solid #eee; }
-h2              { font-size: 1.2em; }
+body {
+    font-family: sans-serif;
+    background: #eee;
+    font-size: 16px
+}
 
-.page           { margin: 2em auto; border: 5px solid #ccc;
-                  padding: 0.8em; background: white; }
-.entries        { list-style: none; margin: 0; padding: 0; }
-.entries li     { margin: 0.8em 1.2em; }
-.entries li h2  { margin-left: -1em; }
-.add-entry      { font-size: 0.9em; border-bottom: 1px solid #ccc; }
-.add-entry dl   { font-weight: bold; }
-.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
-                  margin-bottom: 1em; background: #fafafa; }
-.flash          { background: #cee5F5; padding: 0.5em;
-                  border: 1px solid #aacbe2; }
-.error          { background: #f0d6d6; padding: 0.5em; }
-.main_info      { font-size: 16pt}
+a, h1, h2 {
+    color: #377ba8;
+}
+
+h1, h2 {
+    font-family: 'Georgia', serif;
+    margin: 0;
+}
+
+h1 {
+    border-bottom: 2px solid #eee;
+}
+
+h2 {
+    font-size: 1.2em;
+}
+
+.page {
+    margin: 2em auto;
+    border: 5px solid #ccc;
+    padding: 0.8em;
+    background: white;
+}
+
+.entries {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.entries li {
+    margin: 0.8em 1.2em;
+}
+
+.entries li h2 {
+    margin-left: -1em;
+}
+
+.add-entry {
+    font-size: 0.9em;
+    border-bottom: 1px solid #ccc;
+}
+
+.add-entry dl {
+    font-weight: bold;
+}
+
+.metanav {
+    text-align: right;
+    font-size: 0.8em;
+    padding: 0.3em;
+    margin-bottom: 1em;
+    background: #fafafa;
+}
+
+.flash {
+    background: #cee5F5;
+    padding: 0.5em;
+    border: 1px solid #aacbe2;
+}
+
+.error {
+    background: #f0d6d6;
+    padding: 0.5em;
+}
+
+.main_info {
+    font-size: 16pt
+}
+
+.interval_True {
+    background: white;
+}
+
+.interval_False {
+    background: #cccccc;
+    color: crimson
+}
+
+.interval_table tbody {
+    width: 500px;
+    margin: 2em;
+}
+
+.interval_table td {
+    width: 20%;
+}
+
+.interval_table tr:nth-child(odd) {
+    background-color: #f0d6d6;
+    background-blend-mode: multiply;
+}
+
+sup {
+    font-size: 66%;
+    vertical-align: middle;
+    padding-left: .2em;
+    font-style: italic;
+}
+
+.history_table tbody {
+    width: 60%;
+    table-layout: fixed;
+}
+
+.history_table tr:first-child {
+    color: black
+}
+
+.history_table td:first-child {
+    color: darkgrey
+}
+
+.history_table td {
+    width: auto;
+    padding: 8px;
+}
+
+.history_table td:nth-child(2) {
+    font-weight: bold
+}
+
+.history_table tr {
+    color: darkgrey;
+}
+
+
+.user_table tbody {
+    width: 500px;
+    margin: 2em;
+}
+
+.user_table td {
+    width: 20%;
+}
+.user_table tr:nth-child(odd){
+    background: lightgrey;
+}
+
+.login_pic {
+    font-size: 32px;
+    display: inline-flex;
+    width: 96px;
+    height: 96px;
+    text-align: center;
+    vertical-align: middle;
+}

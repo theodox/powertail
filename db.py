@@ -12,11 +12,11 @@ def display_time(time):
     if time >= 24:
         return "midnight"
     hrs = int(time) % 12
-    am = "AM"
+    am = "<sup>am</sup>"
     if time >= 12:
-        am = "PM"
+        am = "<sup>pm</sup>"
     minutes = int((time - int(time)) * 60)
-    return "{}:{:02d} {}".format(hrs, minutes, am)
+    return "{}:{:02d}{}".format(hrs, minutes, am)
 
 
 def init_db(app):
@@ -112,3 +112,10 @@ def log(connection, kid, message):
     if not kid:
         return
     connection.execute("INSERT INTO history (kids_name, event) VALUES (?,?)", (kid, message))
+
+
+def time_fmt(mins):
+    if mins > 60:
+        hrs = mins / 60.0
+        return "{:.1f} hrs".format(hrs)
+    return "{} mins".format(int(mins))
