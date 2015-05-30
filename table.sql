@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS kids;
 CREATE TABLE kids (
   name     TEXT PRIMARY KEY NOT NULL,
   password TEXT             NOT NULL,
+  pic       TEXT    DEFAULT '',
   balance  REAL             NOT NULL,
   cap      INTEGER          NOT NULL DEFAULT 60,
   replenished  TEXT NOT NULL DEFAULT '2015-01-01'
@@ -44,13 +45,13 @@ CREATE TABLE history
   FOREIGN KEY (kids_name) REFERENCES kids (name)
 );
 
-INSERT INTO kids ('name', 'password', 'balance', 'cap') VALUES
-  ('Nicky', 'nicky', 0, 60),
-  ('Helen', 'helen', 0, 60),
-  ('Al', 'al', 0, 360),
-  ('Daddy', 'dad', 0, 240),
-  ('Guest', 'guest', 0, 60),
-  ('System', 'va4uvu', 0,0);
+INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap') VALUES
+  ('Nicky', 'nicky', 'swimmer', 0, 60),
+  ('Helen', 'helen', 'flower', 0, 60),
+  ('Al', 'al', 'stud', 0, 360),
+  ('Daddy', 'dad', 'goggles', 0, 240),
+  ('Guest', 'guest', '', 0, 60),
+  ('System', 'va4uvu','',  0,0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
   (1, 14.5, 16.5, 'Helen'),

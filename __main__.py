@@ -2,7 +2,7 @@ import sys
 import time
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash
-
+from collections import OrderedDict
 from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt
 import datetime
 
@@ -28,8 +28,8 @@ manager = None
 def before_request():
     g.db = connect_db()
     g.g_time = time.strftime("%I:%M %p")
-    known_logins = g.db.execute('SELECT name FROM kids WHERE name != "System"').fetchall()
-    g.logins = [i[0] for i in known_logins]
+    known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name != "System" ORDER BY NAME ').fetchall()
+    g.logins = OrderedDict(known_logins)
 
 
 @app.teardown_request
@@ -48,7 +48,7 @@ def front_page():
     interval = current_interval(manager._kid)
     remaining = int(min(interval.balance, interval.remaining))
     clock = time.strftime("%I:%M %p")
-    news = dict(user=user, state=state, remaining=remaining, time=clock)
+    news = OrderedDict(user=user, state=state, remaining=remaining, time=clock)
     if state == "ON":
         flash("tv is on")
     return render_template('main.html', news=news)
@@ -152,7 +152,11 @@ def donate(username=None):
         cur.execute("SELECT name FROM kids")
         all_kids = [i[0] for i in cur.fetchall()]
     if request.method == 'GET':
-        return render_template('donate.html', error=error, children=(username,) )
+        if username:
+            return render_template('donate.html', error=error, children=(username,) )
+        else:
+            return render_template('donate.html', error=error, children=all_kids)
+
     elif request.method == 'POST':
         with connect_db() as conn:
             cur = conn.cursor()
