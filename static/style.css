@@ -150,11 +150,11 @@ sup {
      width: 90%;
      margin: 5%;
     display: flex;
-    flex-flow: row;
+    flex-flow: wrap;
  }
 .login_pic {
-    width: 128px;
-    height: 128px;
+    width: 72px;
+    height: 72px;
     background: green;
 
 }

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Add Time</h2>
+    <form method="post" action="extend">
+        <dl>
+            <dt>Give time</dt>
+            <dd>
+                Give
+
+                <select name="amount">
+                    <option value="10">10 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="120">4 hours</option>
+                </select>
+            </dd>
+        </dl>
+        <dl>
+            <dt>System password:
+            <dd><input type=password name=password>
+            <dd><input type=submit value=Login>
+        </dl>
+    </form>
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+{% endblock %}

@@ -19,6 +19,14 @@ CREATE TABLE intervals (
   FOREIGN KEY (kids_name) REFERENCES kids (name)
 );
 
+DROP TABLE IF EXISTS temporaries;
+CREATE TABLE temporaries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT ,
+  ends  DATETIME NOT NULL
+);
+
+
+
 DROP TABLE IF EXISTS replenish;
 CREATE TABLE replenish
 (

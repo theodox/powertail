@@ -1,13 +1,43 @@
 {% extends "layout.html" %}
 {% block head %}
     <title>PowerTail</title>
-    <meta http-equiv="refresh" content="4">
 {% endblock %}
 {% block body %}
-  <table class=main_info>
-  {% for k, v in news.items()%}
-     <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
-  {% endfor %}
-  </table>
+    <input id="foo" name="foo" type="text" value="" size="55" />
+    <table class=main_info>
+        {% for k, v in news.items() %}
+            <tr>
+                <td>{{ k }}</td>
+                <td>{{ v }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
+    <script type=text/javascript>
+        function beep() {
+            document.getElementById("notification").play();
+
+            console.write("beep");
+        }
+    </script>
+
+    <audio style="display: none;" id="notification" preload src="static/Zen Temple Bell-SoundBible.com-2070036999.mp3"/>
+
+    <script type="text/javascript">
+        function updateTime() {
+            var now = new Date();
+            $('#foo').val(now.toTimeString());
+        }
+
+        setInterval(updateTime, 1000); // 5 * 1000 miliseconds
+    </script>
+
+    <script type=text/javascript>
+        $(function () {
+                    console.log("boo");
+                    updateTime();
+                }
+        )
+
+    </script>
 {% endblock %}

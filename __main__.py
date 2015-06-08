@@ -3,7 +3,7 @@ import time
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash
 from collections import OrderedDict
-from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt
+from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary
 import datetime
 
 # configuration
@@ -46,7 +46,11 @@ def front_page():
     user = manager._kid or "logged out"
     state = "ON" if manager.state() else "OFF"
     interval = current_interval(manager._kid)
-    remaining = int(min(interval.balance, interval.remaining))
+    remaining = int(min(interval.balance, interval.remaining) + .5)
+    if remaining > 60:
+        remaining = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
+    else:
+        remaining = "{} minutes".format(remaining)
     clock = time.strftime("%I:%M %p")
     news = OrderedDict(user=user, state=state, remaining=remaining, time=clock)
     if state == "ON":
@@ -67,6 +71,24 @@ def users():
     entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3]) for row in cur.fetchall()]
     return render_template('users.html', kids=entries)
 
+@app.route('/extend', methods=['GET','POST'])
+def extend():
+    error = None
+    if request.method == 'GET':
+        return render_template('extend.html', error=error)
+    if request.method == 'POST':
+        with connect_db() as conn:
+            cur = conn.cursor()
+            pwd = request.form['password']
+            pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
+            if pwd == pwd_check.fetchone()[0]:
+                extra_minutes = int (request.form['amount'])
+                add_temporary(extra_minutes)
+                flash("TV will stay on for %s minutes" % extra_minutes)
+                return redirect(url_for('front_page'))
+            else:
+                error = 'Invalid password'
+            return render_template('extend.html', error=error)
 
 @app.route('/today')
 def today():
@@ -85,8 +107,6 @@ def today():
             e['valid'] = e['off_num'] > test
         if today:
             results[u] = time_fmt(cap), time_fmt(interval.balance), today
-
-
 
     return render_template('today.html', entries=results)
 

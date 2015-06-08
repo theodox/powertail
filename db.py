@@ -28,6 +28,13 @@ def init_db(app):
         log(db, 'System', 'database created')
 
 
+def hournumber(dt):
+    try:
+       dt =  datetime.datetime.strptime(str(dt), "%Y-%m-%d %H:%M:%S.%f")
+    except Exception as e:
+        pass
+    return dt.hour + (dt.minute / 60.0)
+
 def connect_db():
     return sqlite3.connect(DATABASE)
 
@@ -43,19 +50,34 @@ def deduct(kid, amount):
         cur.execute("UPDATE kids SET balance = ? WHERE name = ?", (balance, kid))
 
 
-
-
-
 from collections import namedtuple
 
 interval = namedtuple('interval', 'start end balance remaining')
 
 
+
 def current_interval(kid):
-    if kid is None:
-        return interval(-1, -1, -1, 0)
+
+    now = datetime.datetime.now()
+    now_num = hournumber(now)
+    end_time = -1
+
+    default = interval(now_num, -1, 0, 0)
 
     with connect_db() as db:
+
+        cur = db.execute('DELETE FROM temporaries WHERE ends < ?', (now, ))
+        temps = db.execute("SELECT ends FROM temporaries ORDER BY ends DESC LIMIT 1")
+        temporaries = temps.fetchone()
+        if temporaries:
+            rest = hournumber(temporaries[0])
+
+            default = interval(now_num, rest, (rest-now_num) * 60, (rest-now_num) * 60)
+            print "auto-interval", default
+
+        if kid is None:
+            return default
+
         cur = db.execute("SELECT balance FROM kids WHERE name LIKE ?", (kid,))
         results = cur.fetchone()
         balance = results[0]
@@ -64,13 +86,15 @@ def current_interval(kid):
         intervals = cur.execute("SELECT turn_on, turn_off FROM intervals WHERE kids_name LIKE ? AND day =?",
                                 (kid, today))
         now = datetime.datetime.now()
-        test = now.hour + (now.minute / 60.0)
+        time_as_number = now.hour + (now.minute / 60.0)
         results = intervals.fetchall()
         for r in results:
             on, off = r
-            if on <= test <= off:
-                return interval(on, off, balance, (off - test) * 60)
-        return interval(-1, -1, balance, 0)
+            if on <= time_as_number <= off:
+                if default.remaining > balance:
+                    return default
+                return interval(on, off, balance, (off - time_as_number) * 60)
+        return interval(now_num, -1, balance, 0)
 
 
 def replenish(kid):
@@ -95,6 +119,7 @@ def replenish(kid):
             db.execute("UPDATE kids SET balance = ? , replenished = DATE('now') WHERE name LIKE ?", (new_balance, kid))
             log(db, kid, "replenished with %i credits" % new_balance)
 
+
 def add_credits(kid, amount):
     if kid is None:
         return False
@@ -106,6 +131,15 @@ def add_credits(kid, amount):
 
         db.execute("UPDATE kids SET balance = ? WHERE name LIKE ?", (new_balance, kid))
         log(db, kid, "added %i credits" % amount)
+
+
+def add_temporary(minutes):
+    now = datetime.datetime.now()
+    then = datetime.timedelta(minutes=minutes)
+    ends = now + then
+    with connect_db() as db:
+        db.execute("INSERT  INTO temporaries (ends) VALUES (?)", (ends,));
+        log(db, "System", "extended until %s" % ends)
 
 
 def log(connection, kid, message):

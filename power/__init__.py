@@ -89,7 +89,6 @@ class PowerManager(object):
             interval = db.current_interval(user)
 
             ok = interval.balance > 0 and interval.remaining > 0
-
             msg = None
             with db.connect_db() as conn:
                 if ok:
