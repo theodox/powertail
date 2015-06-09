@@ -3,7 +3,7 @@
     <title>PowerTail</title>
 {% endblock %}
 {% block body %}
-    <input id="foo" name="foo" type="text" value="" size="55" />
+    <input id="foo" name="foo" type="text" value="" size="55"/>
     <table class=main_info>
         {% for k, v in news.items() %}
             <tr>
@@ -25,19 +25,26 @@
 
     <script type="text/javascript">
         function updateTime() {
-            var now = new Date();
-            $('#foo').val(now.toTimeString());
-        }
+            $.getJSON('/update', function (latest) {
+                        $('#foo').val(latest.remaining);
+                    }
+            )
 
-        setInterval(updateTime, 1000); // 5 * 1000 miliseconds
+        }
+        ;
+
+        setInterval(updateTime, 1000);
     </script>
 
     <script type=text/javascript>
         $(function () {
-                    console.log("boo");
                     updateTime();
                 }
         )
-
     </script>
+    <script type=text/javascript>
+        $('.flash').show().fadeOut(4000)
+    </script>
+
+
 {% endblock %}

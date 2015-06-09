@@ -1,7 +1,7 @@
 import sys
 import time
 
-from flask import Flask, request, session, g, redirect, url_for, render_template, flash
+from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 from collections import OrderedDict
 from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary
 import datetime
@@ -232,6 +232,19 @@ def get_schedule(username):
     cap, entries = get_schedule_for_user(username)
     return render_template('schedule.html', cap  = cap, entries=entries,username=username)
 
+
+@app.route('/update')
+def update():
+    user = manager._kid or "logged out"
+    state = "ON" if manager.state() else "OFF"
+    interval = current_interval(manager._kid)
+    remaining = int(min(interval.balance, interval.remaining) + .5)
+    if remaining > 60:
+        remaining = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
+    else:
+        remaining = "{} minutes".format(remaining)
+    clock = time.strftime("%I:%M %p")
+    return jsonify(user=user, state=state, remaining=remaining, time=clock)
 
 
 @app.route('/logout')
