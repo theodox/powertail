@@ -3,15 +3,7 @@
     <title>PowerTail</title>
 {% endblock %}
 {% block body %}
-    <input id="foo" name="foo" type="text" value="" size="55"/>
-    <table class=main_info>
-        {% for k, v in news.items() %}
-            <tr>
-                <td>{{ k }}</td>
-                <td>{{ v }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+
 
     <script type=text/javascript>
         function beep() {
@@ -21,30 +13,10 @@
         }
     </script>
 
-    <audio style="display: none;" id="notification" preload src="static/Zen Temple Bell-SoundBible.com-2070036999.mp3"/>
+    <audio style="display: none;" id="notification" preload src="static/Zen Temple Bell-SoundBible.com-2070036999.mp3"></audio>
 
-    <script type="text/javascript">
-        function updateTime() {
-            $.getJSON('/update', function (latest) {
-                        $('#foo').val(latest.remaining);
-                    }
-            )
 
-        }
-        ;
 
-        setInterval(updateTime, 1000);
-    </script>
-
-    <script type=text/javascript>
-        $(function () {
-                    updateTime();
-                }
-        )
-    </script>
-    <script type=text/javascript>
-        $('.flash').show().fadeOut(4000)
-    </script>
 
 
 {% endblock %}

@@ -6,8 +6,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="{{
   url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
-
-
 </head>
 <div class=page>
     <div class=metanav>
@@ -54,18 +52,48 @@
 
         {% endfor %}
         </div>
-        <p>Logged in as {{ session.username }}.</p>
+        <div class="status">
+            {% if session.username %}
+                <div>Logged in as <a
+                        href="{{ url_for('get_schedule', username = session.username) }}">{{ session.username }}</a>
+                </div>
+            {% else %}
+                <div>Logged out</div>
+            {% endif %}
 
+            <div>The time is now {{ g.g_time }}</div>
+            <div>time remaining: <span id="remaining">-inactive-</span></div>
+            <div>power: <span id="power">-inactive-</span></div>
+        </div>
+        {% block body %}{% endblock %}
         <div id="messages">
             {% for message in get_flashed_messages() %}
                 <div class=flash>{{ message }}</div>
             {% endfor %}
         </div>
-        <p>The time is now {{ g.g_time }}</p>
-        {% block body %}{% endblock %}
-
-
+        <script type=text/javascript>
+            $('.flash').show().fadeOut(4000)
+        </script>
     </div>
+    <script type="text/javascript">
+        function updateTime() {
+            $.getJSON('/update', function (latest) {
+                        $('#remaining').html(latest.remaining);
+                        $('#power').html(latest.state)
+                    }
+            )
 
+        }
+        ;
+
+        setInterval(updateTime, 1000);
+    </script>
+
+    <script type=text/javascript>
+        $(function () {
+                    updateTime();
+                }
+        )
+    </script>
 
 </div>
