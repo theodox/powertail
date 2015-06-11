@@ -28,7 +28,7 @@ manager = None
 def before_request():
     g.db = connect_db()
     g.g_time = time.strftime("%I:%M %p")
-    known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name != "System" ORDER BY NAME ').fetchall()
+    known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
     g.logins = OrderedDict(known_logins)
 
 
@@ -240,11 +240,11 @@ def update():
     interval = current_interval(manager._kid)
     remaining = int(min(interval.balance, interval.remaining) + .5)
     if remaining > 60:
-        remaining = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
+        display = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
     else:
-        remaining = "{} minutes".format(remaining)
+        display = "{} minutes".format(remaining)
     clock = time.strftime("%I:%M %p")
-    return jsonify(user=user, state=state, remaining=remaining, time=clock)
+    return jsonify(user=user, state=state, remaining=display, time=clock, minutes = remaining)
 
 
 @app.route('/logout')

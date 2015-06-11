@@ -169,3 +169,7 @@ div #grayout {
     opacity: 0.5;
 }
 
+.status {
+    font-size: 2em;
+}
+

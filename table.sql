@@ -58,7 +58,6 @@ INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap') VALUES
   ('Helen', 'helen', 'flower', 0, 60),
   ('Al', 'al', 'stud', 0, 360),
   ('Daddy', 'dad', 'goggles', 0, 240),
-  ('Guest', 'guest', '', 0, 60),
   ('System', 'va4uvu','',  0,0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
