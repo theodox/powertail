@@ -25,47 +25,49 @@
 </head>
 <div class="page-header">
     <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <button class="btn navbar-btn" type="button" id="powerbutton">
-                <span id="remaining">0</span><span>&nbsp;left&nbsp;</span>
-                <span class="badge" id="powerbadge"></span>
-            </button>
-        </div>
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <button class="btn btn-default navbar-btn" type="button" id="powerbutton">
+                    <span id="remaining">0</span><span>&nbsp;left&nbsp;</span>
+                    <span class="badge" id="powerbadge"></span>
+                </button>
+            </div>
 
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav nav-pills ">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav nav-pills nav-justified">
 
-                <li id="history">
-                    <a href="{{ url_for('show_history') }}">history</a>
-                </li>
-                <li id="today">
-                    <a href="{{ url_for('today') }}">today</a>
-                </li>
-                <li id="schedule">
-                    <a href="{{ url_for('overall_schedule') }}">schedule</a>
-                </li>
-                <li id="users">
-                    <a href="{{ url_for('users') }}">users</a>
-                </li>
-
-                <li id="extend">
-                    <a href="{{ url_for('extend') }}">extra</a>
-                </li>
-                {% if  session.logged_in %}
-                    <li>
-
-                        <a href="{{ url_for('logout') }}">log out</a>
+                    <li id="history">
+                        <a href="{{ url_for('show_history') }}">history</a>
                     </li>
-                {% endif %}
+                    <li id="today">
+                        <a href="{{ url_for('today') }}">today</a>
+                    </li>
+                    <li id="schedule">
+                        <a href="{{ url_for('overall_schedule') }}">schedule</a>
+                    </li>
+                    <li id="users">
+                        <a href="{{ url_for('users') }}">users</a>
+                    </li>
 
-            </ul>
+                    <li id="extend">
+                        <a href="{{ url_for('extend') }}">extra</a>
+                    </li>
+                    {% if  session.logged_in %}
+                        <li>
+
+                            <a href="{{ url_for('logout') }}">log out</a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </div>
         </div>
     </nav>
 </div>
@@ -89,7 +91,7 @@
         <div>
             {% block body %}{% endblock %}
         </div>
-        <div >
+        <div>
             <div id="messages">
                 {% for message in get_flashed_messages() %}
                     <div class=flash>
