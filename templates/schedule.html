@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
+    <div class="container">
     <h2>Weekly Schedule for {{ username }}</h2>
     maximum minutes = {{ cap }}
-    <table class=interval_False>
+    debts = {{ debit }}
+    <table class="table table-bordered table-responsive">
         <tr>
             <th>day</th>
                 <th>add</th>
@@ -15,8 +17,9 @@
                 <td>{{ entry.add | safe }}</td>
                 <td>{{ entry.on | safe }}</td>
                 <td>{{ entry.off |safe }}</td>
-            </tr>
+        </tr>
 
         {% endfor %}
     </table>
+    </div>
 {% endblock %}

@@ -75,7 +75,7 @@
     <div class="col-sm-12">
         <div class="row">
             {% for k, v in g.logins.items() %}
-                {% if k == session.username %}
+                {% if k == g.active_user %}
                     <div class="col-lg-3 col-md-6 col-xs-6 thumb selected">
                 {% else %}
                     <div class="col-lg-3 col-md-6 col-xs-6 thumb">
@@ -144,5 +144,12 @@
                 }
         )
     </script>
+    <script type=text/javascript>
+        $(function () {
+                    $("#powerbutton").onclick  = function() {alert("hello");};
+                }
+        )
+    </script>
+
 </div>
 </html>

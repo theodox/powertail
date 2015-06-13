@@ -39,16 +39,6 @@ def connect_db():
     return sqlite3.connect(DATABASE)
 
 
-def deduct(kid, amount):
-    if kid is None:
-        return
-    with connect_db() as db:
-        cur = db.cursor()
-        cur.execute("SELECT balance FROM kids WHERE name = ?", (kid,))
-        balance = cur.fetchone()[0]
-        balance = max(balance - amount, 0)
-        cur.execute("UPDATE kids SET balance = ? WHERE name = ?", (balance, kid))
-
 
 from collections import namedtuple
 
@@ -73,7 +63,6 @@ def current_interval(kid):
             rest = hournumber(temporaries[0])
 
             default = interval(now_num, rest, (rest-now_num) * 60, (rest-now_num) * 60)
-            print "auto-interval", default
 
         if kid is None:
             return default
@@ -115,6 +104,12 @@ def replenish(kid):
             cap_amount = db.execute("SELECT cap, balance FROM kids WHERE name LIKE ?", (kid,))
             cap, balance = cap_amount.fetchone()
             new_balance = min(cap, refresh + balance)
+            deductions = db.execute("SELECT debit FROM kids WHERE name LIKE ?", (kid,)).fetchone()
+            if deductions:
+                delta = new_balance - deductions[0]
+                remaining_debit = int(max(0, deductions[0] - delta))
+                db.execute("UPDATE kids SET debit = ? WHERE name LIKE ?", (remaining_debit, kid))
+                new_balance = int( max(0, delta))
 
             db.execute("UPDATE kids SET balance = ? , replenished = DATE('now') WHERE name LIKE ?", (new_balance, kid))
             log(db, kid, "replenished with %i credits" % new_balance)
@@ -131,6 +126,17 @@ def add_credits(kid, amount):
 
         db.execute("UPDATE kids SET balance = ? WHERE name LIKE ?", (new_balance, kid))
         log(db, kid, "added %i credits" % amount)
+
+def deduct(kid, debit):
+    if kid is None:
+        return False
+
+    with connect_db() as db:
+        balance  = db.execute("SELECT  balance FROM kids WHERE name LIKE ?", (kid,)).fetchone()[0]
+        delta = max(0, balance - debit)
+        remaining_debit = max(0, debit-balance)
+        db.execute("UPDATE kids SET balance = ?, debit = ? WHERE name LIKE ?", (delta, remaining_debit, kid))
+        log(db, kid, "deducted %i credits" % debit)
 
 
 def add_temporary(minutes):

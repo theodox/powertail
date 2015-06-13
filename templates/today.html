@@ -1,21 +1,36 @@
 {% extends "layout.html" %}
 {% block body %}
     {% for kid,  sched in entries.items() %}
-        <div class="scheduleitem">
-        <h3> {{ kid }} </h3>
-        Time Available =  {{ sched[1] }} / {{ sched[0] }}
+        <div class="container">
+            <div class="row row-centered">
+                <h3>
+                    <button type="button" class="btn btn-default" aria-label="Left Align">
+                        <a href="{{ url_for('donate', username=kid) }}">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                            </a>
+                    </button>
+                    <button type="button" class="btn btn-default" aria-label="Left Align">
+                        <a href="{{ url_for('apply_debit', username=kid) }}">
 
-        <a href="{{ url_for('donate', username=kid) }}">+</a>
-        <table class="interval_table" width="50%">
+                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                            </a>
+                    </button>
 
-        {% for eachentry in sched[2] %}
-            <tr >
-                        <td>{{ eachentry.add | safe }}</td>
-                        <td>{{ eachentry.on |safe }}</td>
-                        <td>{{ eachentry.off | safe }}</td>
+                    {{ kid }} <span class="small">{{ sched[1] }} / {{ sched[0] }} remaining</span></h3>
+
+                <table class="table table-responsive table-bordered table-striped">
+                    <tr>
+                        <th>start</th>
+                        <th>end</th>
                     </tr>
-            {% endfor %}
+                    {% for eachentry in sched[2] %}
+                        <tr>
+                            <td>{{ eachentry.on |safe }}</td>
+                            <td>{{ eachentry.off | safe }}</td>
+                        </tr>
+                    {% endfor %}
                 </table>
+            </div>
         </div>
     {% endfor %}
 {% endblock %}

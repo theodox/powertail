@@ -3,7 +3,7 @@ import time
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 from collections import OrderedDict
-from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary
+from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary, deduct
 import datetime
 
 # configuration
@@ -30,6 +30,7 @@ def before_request():
     g.g_time = time.strftime("%I:%M %p")
     known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
     g.logins = OrderedDict(known_logins)
+    g.active_user = manager._kid
 
 
 @app.teardown_request
@@ -67,8 +68,8 @@ def show_history():
 
 @app.route('/users')
 def users():
-    cur = g.db.execute('select name, balance, cap, replenished from kids WHERE name NOT  like "System"')
-    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3]) for row in cur.fetchall()]
+    cur = g.db.execute('select name, balance, cap, replenished, debit from kids WHERE name NOT  like "System"')
+    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3], debit=-1 * row[4]) for row in cur.fetchall()]
     return render_template('users.html', kids=entries)
 
 @app.route('/extend', methods=['GET','POST'])
@@ -101,12 +102,12 @@ def today():
     users = [k[0] for k in users]
     for u in users:
         interval = current_interval(u)
-        cap, entries = get_schedule_for_user(u)
+        cap, entries, debit = get_schedule_for_user(u)
         today = [e for e in entries if e['day_num'] == day_num]
         for e in today:
             e['valid'] = e['off_num'] > test
         if today:
-            results[u] = time_fmt(cap), time_fmt(interval.balance), today
+            results[u] = time_fmt(cap), time_fmt(interval.balance), today, time_fmt(-1 * debit)
 
     return render_template('today.html', entries=results)
 
@@ -192,9 +193,37 @@ def donate(username=None):
 
         return render_template('donate.html', error=error, children=all_kids)
 
+@app.route('/debit/')
+@app.route('/debit/<username>', methods=['GET', 'POST'])
+def apply_debit(username=None):
+    error = None
+    with connect_db() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM kids")
+        all_kids = [i[0] for i in cur.fetchall()]
+    if request.method == 'GET':
+        if username:
+            return render_template('debit.html', error=error, children=(username,) )
+        else:
+            return render_template('debit.html', error=error, children=all_kids)
+
+    elif request.method == 'POST':
+        with connect_db() as conn:
+            cur = conn.cursor()
+            pwd = request.form['password']
+            pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
+            if pwd == pwd_check.fetchone()[0]:
+                deduction = int (request.form['amount'])
+                kid = request.form['child']
+                deduct(kid, deduction)
+                flash("deducted %s from %s" % (deduction, kid))
+            else:
+                error = 'Invalid password'
+
+        return render_template('debit.html', username = username, error=error, children=all_kids)
 
 def get_schedule_for_user(username):
-    cap = g.db.execute('select cap from kids WHERE name LIKE ?', (username,)).fetchone()[0]
+    cap, debit  = g.db.execute('select cap, debit from kids WHERE name LIKE ?', (username,)).fetchone()
     replenish = g.db.execute('select * from replenish where kids_name LIKE ?', (username,))
     repl = replenish.fetchone()[1:-1]
     day_names = 'Sun Mon Tue Wed Thu Fri Sat'.split()
@@ -213,8 +242,9 @@ def get_schedule_for_user(username):
             'off_num': row[2]
         }
 
+
     entries = [row_fmt(row) for row in schedule.fetchall()]
-    return cap, entries
+    return cap, entries, debit
 
 
 @app.route('/schedule')
@@ -229,8 +259,8 @@ def overall_schedule():
 @app.route('/schedule/<username>')
 def get_schedule(username):
 
-    cap, entries = get_schedule_for_user(username)
-    return render_template('schedule.html', cap  = cap, entries=entries,username=username)
+    cap, entries, debit = get_schedule_for_user(username)
+    return render_template('schedule.html', cap  = cap, entries=entries, debit=debit, username=username)
 
 
 @app.route('/update')

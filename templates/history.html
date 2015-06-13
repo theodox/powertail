@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  <table class=history_table>
+  <table class="table table-striped">
   {% for entry in entries%}
      <tr><td>{{ entry.time }}</td><td>{{ entry.kid }}</td><td>{{ entry.msg }}</td></tr>
   {% endfor %}

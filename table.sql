@@ -5,7 +5,9 @@ CREATE TABLE kids (
   pic       TEXT    DEFAULT '',
   balance  REAL             NOT NULL,
   cap      INTEGER          NOT NULL DEFAULT 60,
-  replenished  TEXT NOT NULL DEFAULT '2015-01-01'
+  replenished  TEXT NOT NULL DEFAULT '2015-01-01',
+  debit   INTEGER DEFAULT  0
+
 );
 
 
@@ -53,12 +55,12 @@ CREATE TABLE history
   FOREIGN KEY (kids_name) REFERENCES kids (name)
 );
 
-INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap') VALUES
-  ('Nicky', 'nicky', 'swimmer', 0, 60),
-  ('Helen', 'helen', 'flower', 0, 60),
-  ('Al', 'al', 'stud', 0, 360),
-  ('Daddy', 'dad', 'goggles', 0, 240),
-  ('System', 'va4uvu','',  0,0);
+INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap', 'debit') VALUES
+  ('Nicky', 'nicky', 'swimmer', 0, 60, 0),
+  ('Helen', 'helen', 'flower', 0, 60, 0),
+  ('Al', 'al', 'stud', 0, 240, 0),
+  ('Daddy', 'dad', 'goggles', 0, 240, 0 ),
+  ('System', 'va4uvu','',  0,0, 0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
   (1, 14.5, 16.5, 'Helen'),
