@@ -1,10 +1,13 @@
 import sys
 import time
+from collections import OrderedDict
+import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
-from collections import OrderedDict
-from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary, deduct
-import datetime
+
+from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary, deduct, \
+    clear_temporary
+
 
 # configuration
 
@@ -13,9 +16,6 @@ SECRET_KEY = 'development key'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
-
-
-
 app = Flask(__name__)
 app.config.from_object(__name__)
 # todo: the above can be a separate file: see  http://flask.pocoo.org/docs/0.10/tutorial/setup/#tutorial-setup
@@ -23,6 +23,7 @@ app.config.from_object(__name__)
 from  power import PowerManager
 
 manager = None
+
 
 @app.before_request
 def before_request():
@@ -49,7 +50,7 @@ def front_page():
     interval = current_interval(manager._kid)
     remaining = int(min(interval.balance, interval.remaining) + .5)
     if remaining > 60:
-        remaining = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
+        remaining = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
     else:
         remaining = "{} minutes".format(remaining)
     clock = time.strftime("%I:%M %p")
@@ -69,10 +70,12 @@ def show_history():
 @app.route('/users')
 def users():
     cur = g.db.execute('select name, balance, cap, replenished, debit from kids WHERE name NOT  like "System"')
-    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3], debit=-1 * row[4]) for row in cur.fetchall()]
+    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3], debit=-1 * row[4]) for row in
+               cur.fetchall()]
     return render_template('users.html', kids=entries)
 
-@app.route('/extend', methods=['GET','POST'])
+
+@app.route('/extend', methods=['GET', 'POST'])
 def extend():
     error = None
     if request.method == 'GET':
@@ -83,7 +86,7 @@ def extend():
             pwd = request.form['password']
             pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
             if pwd == pwd_check.fetchone()[0]:
-                extra_minutes = int (request.form['amount'])
+                extra_minutes = int(request.form['amount'])
                 add_temporary(extra_minutes)
                 flash("TV will stay on for %s minutes" % extra_minutes)
                 return redirect(url_for('front_page'))
@@ -91,9 +94,9 @@ def extend():
                 error = 'Invalid password'
             return render_template('extend.html', error=error)
 
+
 @app.route('/today')
 def today():
-
     day_num = int(time.strftime("%w"))
     now = datetime.datetime.now()
     test = now.hour + (now.minute / 60.0)
@@ -110,8 +113,6 @@ def today():
             results[u] = time_fmt(cap), time_fmt(interval.balance), today, time_fmt(-1 * debit)
 
     return render_template('today.html', entries=results)
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -174,7 +175,7 @@ def donate(username=None):
         all_kids = [i[0] for i in cur.fetchall()]
     if request.method == 'GET':
         if username:
-            return render_template('donate.html', error=error, children=(username,) )
+            return render_template('donate.html', error=error, children=(username,))
         else:
             return render_template('donate.html', error=error, children=all_kids)
 
@@ -184,7 +185,7 @@ def donate(username=None):
             pwd = request.form['password']
             pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
             if pwd == pwd_check.fetchone()[0]:
-                extra = int (request.form['amount'])
+                extra = int(request.form['amount'])
                 kid = request.form['child']
                 add_credits(kid, extra)
                 flash("added %s to %s" % (extra, kid))
@@ -192,6 +193,7 @@ def donate(username=None):
                 error = 'Invalid password'
 
         return render_template('donate.html', error=error, children=all_kids)
+
 
 @app.route('/debit/')
 @app.route('/debit/<username>', methods=['GET', 'POST'])
@@ -203,7 +205,7 @@ def apply_debit(username=None):
         all_kids = [i[0] for i in cur.fetchall()]
     if request.method == 'GET':
         if username:
-            return render_template('debit.html', error=error, children=(username,) )
+            return render_template('debit.html', error=error, children=(username,))
         else:
             return render_template('debit.html', error=error, children=all_kids)
 
@@ -213,17 +215,18 @@ def apply_debit(username=None):
             pwd = request.form['password']
             pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
             if pwd == pwd_check.fetchone()[0]:
-                deduction = int (request.form['amount'])
+                deduction = int(request.form['amount'])
                 kid = request.form['child']
                 deduct(kid, deduction)
                 flash("deducted %s from %s" % (deduction, kid))
             else:
                 error = 'Invalid password'
 
-        return render_template('debit.html', username = username, error=error, children=all_kids)
+        return render_template('debit.html', username=username, error=error, children=all_kids)
+
 
 def get_schedule_for_user(username):
-    cap, debit  = g.db.execute('select cap, debit from kids WHERE name LIKE ?', (username,)).fetchone()
+    cap, debit = g.db.execute('select cap, debit from kids WHERE name LIKE ?', (username,)).fetchone()
     replenish = g.db.execute('select * from replenish where kids_name LIKE ?', (username,))
     repl = replenish.fetchone()[1:-1]
     day_names = 'Sun Mon Tue Wed Thu Fri Sat'.split()
@@ -247,6 +250,20 @@ def get_schedule_for_user(username):
     return cap, entries, debit
 
 
+@app.route('/off')
+def shutdown():
+    try:
+        logout()
+    except:
+        pass
+
+    clear_temporary()
+    flash('tv shut down')
+
+    return redirect(url_for('front_page'))
+
+
+
 @app.route('/schedule')
 def overall_schedule():
     results = dict()
@@ -258,9 +275,8 @@ def overall_schedule():
 
 @app.route('/schedule/<username>')
 def get_schedule(username):
-
     cap, entries, debit = get_schedule_for_user(username)
-    return render_template('schedule.html', cap  = cap, entries=entries, debit=debit, username=username)
+    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username)
 
 
 @app.route('/update')
@@ -270,11 +286,11 @@ def update():
     interval = current_interval(manager._kid)
     remaining = int(min(interval.balance, interval.remaining) + .5)
     if remaining > 60:
-        display = "{} hours {} minutes".format( int(remaining/60.0),  remaining%60)
+        display = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
     else:
         display = "{} minutes".format(remaining)
     clock = time.strftime("%I:%M %p")
-    return jsonify(user=user, state=state, remaining=display, time=clock, minutes = remaining)
+    return jsonify(user=user, state=state, remaining=display, time=clock, minutes=remaining)
 
 
 @app.route('/logout')
@@ -284,7 +300,6 @@ def logout():
     manager.set_user(None)
     flash('You were logged out')
     return redirect(url_for('front_page'))
-
 
 
 if __name__ == '__main__':

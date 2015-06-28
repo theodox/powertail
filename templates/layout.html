@@ -59,9 +59,11 @@
                     <li id="extend">
                         <a href="{{ url_for('extend') }}">extra</a>
                     </li>
+                    <li id="shut down">
+                        <a href="{{ url_for('shutdown') }}">shut down</a>
+                    </li>
                     {% if  session.logged_in %}
                         <li>
-
                             <a href="{{ url_for('logout') }}">log out</a>
                         </li>
                     {% endif %}

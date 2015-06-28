@@ -148,6 +148,13 @@ def add_temporary(minutes):
         log(db, "System", "extended until %s" % ends)
 
 
+def clear_temporary():
+    with connect_db() as db:
+        db.execute("DELETE FROM  temporaries")
+        log(db, "System", "Cleared temporary intervals")
+
+
+
 def log(connection, kid, message):
     if not kid:
         return
