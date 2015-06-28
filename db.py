@@ -135,8 +135,9 @@ def deduct(kid, debit):
         balance  = db.execute("SELECT  balance FROM kids WHERE name LIKE ?", (kid,)).fetchone()[0]
         delta = max(0, balance - debit)
         remaining_debit = max(0, debit-balance)
-        db.execute("UPDATE kids SET balance = ?, debit = ? WHERE name LIKE ?", (delta, remaining_debit, kid))
-        log(db, kid, "deducted %i credits" % debit)
+        if remaining_debit > 0:
+            db.execute("UPDATE kids SET balance = ?, debit = ? WHERE name LIKE ?", (delta, remaining_debit, kid))
+            log(db, kid, "deducted %i credits" % debit)
 
 
 def add_temporary(minutes):
