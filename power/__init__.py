@@ -23,6 +23,7 @@ except ImportError:
 
 gpio.setup(12, gpio.OUT)
 
+
 class PowerTail(object):
 
 
