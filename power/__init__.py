@@ -133,7 +133,7 @@ class PowerManager(object):
             ts = Thread(None, self.check)
             ts.setDaemon(True)
             ts.start()
-            self.app.logger.critical("(%s) starting monitor thread" % current_thread())
+            self.app.logger.critical("%s: (%s) starting monitor thread" % (time.time(), current_thread()))
         else:
             self.app.logger.critical("(%s) already running" % current_thread())
 
@@ -144,10 +144,6 @@ class PowerManager(object):
     def manager(cls, app):
         if not cls.INSTANCE:
             cls.INSTANCE = PowerManager(app)
-        else:
-            cls.INSTANCE.shutdown()
-            time.sleep(1)
-            print "restarting manager"
-            cls.INSTANCE = PowerManager(app)
+
 
         return cls.INSTANCE

@@ -311,4 +311,4 @@ if __name__ == '__main__':
 
         manager = PowerManager.manager(app)
         manager.monitor()
-        app.run(host=('0.0.0.0'))
+        app.run(host=('0.0.0.0'), use_reloader=False)
