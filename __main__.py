@@ -11,7 +11,7 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
 
 # configuration
 
-DEBUG = False
+DEBUG = True
 SECRET_KEY = 'a;lfsh92why'
 USERNAME = 'admin'
 PASSWORD = 'default'
