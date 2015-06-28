@@ -264,7 +264,7 @@ def shutdown():
 
 
 
-@app.route('/schedule')
+@app.route('/overview')
 def overall_schedule():
     results = dict()
     users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
