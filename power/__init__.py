@@ -6,6 +6,23 @@ import time
 from threading import Thread, current_thread, RLock
 import  db
 
+class gpio_proxy(object):
+    OUT = 1
+
+    def setup(self, pin, val ):
+        print 'pretending to set pin %i to %s' % (pin, val)
+
+    def output(self, pin, val):
+        print 'pretending to set pin %i to %s' % (pin, val)
+
+try:
+    import RPi.GPIO as gpio
+except ImportError:
+    gpio = gpio_proxy()
+
+
+gpio.setup(12, gpio.OUT)
+
 class PowerTail(object):
 
 
@@ -34,6 +51,7 @@ class PowerTail(object):
             self._internal_state = self._state
             with db.connect_db() as conn:
                 db.log(conn, "System", "POWER SET %s" % self._state)
+                gpio.output(12, self._internal_state)
             return self._internal_state
         return None
 
