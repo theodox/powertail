@@ -80,10 +80,11 @@ def current_interval(kid):
         for r in results:
             on, off = r
             if on <= time_as_number <= off:
-                if default.remaining > balance:
-                    return default
-                return interval(on, off, balance, (off - time_as_number) * 60)
-        return interval(now_num, -1, balance, 0)
+                remainder = (off - time_as_number) * 60
+                max_balance = max(balance, default.balance)
+                time_left = max(remainder, default.remaining)
+                return interval(on, off, max_balance, time_left)
+        return default
 
 
 def replenish(kid):
