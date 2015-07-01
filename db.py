@@ -3,9 +3,9 @@ from flask import app
 from contextlib import closing
 import sqlite3
 import datetime
+import os
 
-
-DATABASE = '/tmp/flaskr.db'
+DATABASE = os.path.expanduser('~/_powertail.db')
 
 
 def display_time(time):
