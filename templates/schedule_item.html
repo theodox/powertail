@@ -1,0 +1,25 @@
+{% macro sched(start, end, daynum) -%}
+    <div class="container list-group-item">
+        <div class="row">
+            <div class="col-sm-1" >
+                <a class="btn" href="{{ url_for('donate', username=username) }}">
+                    <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
+                </a>
+            </div>
+            <div class="col-sm-3" style="margin-top: 4px">{{ start|safe }} to {{ end|safe }}</div>
+        </div>
+    </div>
+
+{%-endmacro %}
+
+{% macro add_button(daynum) -%}
+    <div class="container list-group-item bg-info">
+        <div class="row">
+            <div class="col-sm-1">
+                <a class="btn " href="{{ url_for('donate', username=username) }}">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true" ></span> add...
+                </a>
+            </div>
+        </div>
+    </div>
+{%- endmacro %}

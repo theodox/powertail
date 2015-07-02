@@ -1,25 +1,70 @@
 {% extends "layout.html" %}
+{% import "schedule_item.html" as scheditem %}
 {% block body %}
     <div class="container">
-    <h2>Weekly Schedule for {{ username }}</h2>
-    maximum minutes = {{ cap }}
-    debts = {{ debit }}
-    <table class="table table-striped table-bordered table-responsive">
-        <tr>
-            <th>day</th>
-                <th>add</th>
-            <th>start</th>
-            <th>end</th>
-        </tr>
-        {% for entry in entries %}
-            <tr>
-                <td>{{ entry.day }}</td>
-                <td>{{ entry.add | safe }}</td>
-                <td>{{ entry.on | safe }}</td>
-                <td>{{ entry.off |safe }}</td>
-        </tr>
+        <h2>Weekly Schedule for {{ username }}</h2>
+        maximum minutes = {{ cap }}
+        debts = {{ debit }}
+        <div>
+            <button><a href="{{ url_for('donate', username=username) }}">Add credits</a></button>
+        </div>
+        <div>
+            <button><a href="{{ url_for('apply_debit', username=username) }}">Deduct credits</a></button>
+        </div>
+        <div class="container">
+            <ul class="list-group">
+                <div>
+                    <h2>Sunday</h2>
+                    <div class="list-group">
+                    {% for e in entries if e['day'] == 'Sun' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 0) }}
+                    </div>
+                </div>
+                <div >
+                    <h2>Monday</h2>
+                    {% for e in entries if e['day'] == 'Mon' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 1) }}
+                </div>
+                <div >
+                    <h2>Tuesday</h2>
+                    {% for e in entries if e['day'] == 'Tue' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 2) }}
+                </div>
+                <div >
+                    <h2>Wednesday</h2>
+                    {% for e in entries if e['day'] == 'Wed' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 3) }}
+                </div>
+                <div >
+                    <h2>Thursday</h2>
+                    {% for e in entries if e['day'] == 'Thu' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 4) }}
+                </div>
+                <div >
+                    <h1>Friday</h1>
+                    {% for e in entries if e['day'] == 'Fri' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 5) }}
 
-        {% endfor %}
-    </table>
-    </div>
+                </div>
+                <div >
+                    <h1>Saturday</h1>
+                    {% for e in entries if e['day'] == 'Sat' %}
+                        {{ scheditem.sched(e['on'], e['off']) }}
+                    {% endfor %}
+                    {{ scheditem.add_button( 6) }}
+
+                </div>
+                <ul>
 {% endblock %}

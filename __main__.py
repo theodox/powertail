@@ -225,6 +225,11 @@ def apply_debit(username=None):
         return render_template('debit.html', username=username, error=error, children=all_kids)
 
 
+@app.route('/add_interval/<username>')
+def add_interval(username = None):
+    return render_templated('add_interval.htm', username = username)
+
+
 def get_schedule_for_user(username):
     cap, debit = g.db.execute('select cap, debit from kids WHERE name LIKE ?', (username,)).fetchone()
     replenish = g.db.execute('select * from replenish where kids_name LIKE ?', (username,))
