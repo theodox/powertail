@@ -71,7 +71,8 @@ def current_interval(kid):
         results = cur.fetchone()
         balance = results[0]
 
-        today = datetime.date.isoweekday(datetime.date.today())
+        today = datetime.date.isoweekday(datetime.date.today()) + 1
+
         intervals = cur.execute("SELECT turn_on, turn_off FROM intervals WHERE kids_name LIKE ? AND day =?",
                                 (kid, today))
         now = datetime.datetime.now()

@@ -1,8 +1,8 @@
-{% macro sched(start, end, daynum) -%}
+{% macro sched(username, start, end, start_num, end_num,  daynum, dayname) -%}
     <div class="container list-group-item">
         <div class="row">
             <div class="col-sm-1" >
-                <a class="btn" href="{{ url_for('create_interval', username="daddy", daynum=1, dayname = "test") }}">
+                <a class="btn" href="{{ url_for('delete_interval', username=username, daynum=daynum, dayname = dayname, start_num = start_num, end_num = end_num) }}">
                     <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
                 </a>
             </div>

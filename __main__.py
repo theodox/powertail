@@ -13,6 +13,12 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
 
 
 
+
+
+
+
+
+
 # configuration
 
 DEBUG = True
@@ -294,12 +300,12 @@ def create_interval(username):
         return render_template('add_interval.html', username=username, dayname=dayname, daynum=daynum)
     else:
         username = request.form['username']
-
+        daynum = request.form['daynum']
         if not check_sys_password(request):
             error = "Incorrect password"
             return render_template('add_interval.html', username=username,
                                    error=error, dayname=request.form['dayname'],
-                                   daynum=request.form['daynum'])
+                                   daynum=daynum)
         start_hr, start_min = request.form['start_time'].split(":")
         end_hr, end_min = request.form['end_time'].split(":")
         start_num = int(start_hr) + int(start_min) / 60.0
@@ -308,8 +314,57 @@ def create_interval(username):
             error = "End time must be later than start time"
             return render_template('add_interval.html', username=username,
                                    error=error, dayname=request.form['dayname'],
-                                   daynum=request.form['daynum'])
-        return str(username) + str(start_num) + str(end_num)
+                                   daynum=daynum)
+        with connect_db() as db:
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES (?, ?, ?, ?)",
+                           (daynum, start_num, end_num, username))
+
+            flash('added interval')
+            return redirect(url_for('get_schedule', username=username))
+
+
+@app.route('/remove_interval/<username>', methods=['GET', 'POST'])
+def delete_interval(username):
+    error = None
+    if request.method == 'GET':
+        dayname = request.args.get('dayname')
+        daynum = request.args.get('daynum')
+        start_num = float(request.args.get('start_num'))
+        end_num = float(request.args.get('end_num'))
+        start_time = display_time(start_num)
+        end_time = display_time(end_num)
+        return render_template('delete_interval.html', username=username, start_time=start_time, start_num=start_num,
+                               end_time=end_time, end_num=end_num, dayname=dayname, daynum=daynum, error=None)
+    else:
+        username = request.form.get('username')
+        dayname = request.form.get('dayname')
+        daynum = request.form.get('daynum')
+        start_num = float(request.form.get('start_num'))
+        end_num = float(request.form.get('end_num'))
+        start_time = display_time(start_num)
+        end_time = display_time(end_num)
+
+        if not check_sys_password(request):
+            return render_template('delete_interval.html', username=username, start_time=start_time,
+                                   start_num=start_num,
+                                   end_time=end_time, end_num=end_num, dayname=dayname, daynum=daynum,
+                                   error="Incorrect password")
+        with connect_db() as conn:
+            real_day_num = int(daynum)
+            print "SELECT * FROM intervals WHERE (kids_name like %s AND day=%s AND turn_on=%s AND turn_off=%s)" % (
+            username, real_day_num, start_num, end_num)
+
+            print conn.cursor().execute(
+                "SELECT * FROM intervals WHERE (kids_name like ? AND day=? AND ABS (turn_on - ?) < .05  AND ABS (turn_off-?) < .05)",
+                (username, real_day_num, start_num, end_num)).fetchall()
+
+            conn.cursor().execute(
+                "DELETE FROM intervals WHERE (kids_name like ? AND day=? AND ABS (turn_on - ?) < .05  AND ABS (turn_off-?) < .05)",
+                (username, real_day_num, start_num, end_num))
+
+        flash('removed interval for %s' % username)
+        return redirect(url_for('get_schedule', username=username))
 
 
 @app.route('/update')
