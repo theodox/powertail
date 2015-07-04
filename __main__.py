@@ -9,6 +9,10 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
     clear_temporary
 
 
+
+
+
+
 # configuration
 
 DEBUG = True
@@ -23,6 +27,14 @@ app.config.from_object(__name__)
 from  power import PowerManager
 
 manager = None
+
+
+def check_sys_password(request):
+    with connect_db() as conn:
+        cur = conn.cursor()
+        pwd = request.form['password']
+        pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
+        return pwd_check.fetchone()[0] == pwd
 
 
 @app.before_request
@@ -81,18 +93,16 @@ def extend():
     if request.method == 'GET':
         return render_template('extend.html', error=error)
     if request.method == 'POST':
-        with connect_db() as conn:
-            cur = conn.cursor()
-            pwd = request.form['password']
-            pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
-            if pwd == pwd_check.fetchone()[0]:
-                extra_minutes = int(request.form['amount'])
-                add_temporary(extra_minutes)
-                flash("TV will stay on for %s minutes" % extra_minutes)
-                return redirect(url_for('front_page'))
-            else:
-                error = 'Invalid password'
+
+        if not check_sys_password(request):
+            error = "Incorrect password"
             return render_template('extend.html', error=error)
+
+        with connect_db() as conn:
+            extra_minutes = int(request.form['amount'])
+            add_temporary(extra_minutes)
+            flash("TV will stay on for %s minutes" % extra_minutes)
+            return redirect(url_for('front_page'))
 
 
 @app.route('/today')
@@ -180,19 +190,17 @@ def donate(username=None):
             return render_template('donate.html', error=error, children=all_kids)
 
     elif request.method == 'POST':
-        with connect_db() as conn:
-            cur = conn.cursor()
-            pwd = request.form['password']
-            pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
-            if pwd == pwd_check.fetchone()[0]:
-                extra = int(request.form['amount'])
-                kid = request.form['child']
-                add_credits(kid, extra)
-                flash("added %s to %s" % (extra, kid))
-            else:
-                error = 'Invalid password'
 
-        return render_template('donate.html', error=error, children=all_kids)
+        if not check_sys_password(request):
+            error = "Incorrect password"
+            return render_template('donate.html', error=error, children=(request.form['child'],),
+                                   username=request.form['child'])
+
+        extra = int(request.form['amount'])
+        kid = request.form['child']
+        add_credits(kid, extra)
+        flash("added %s to %s" % (extra, kid))
+        return redirect(url_for('today'))
 
 
 @app.route('/debit/')
@@ -210,24 +218,18 @@ def apply_debit(username=None):
             return render_template('debit.html', error=error, children=all_kids)
 
     elif request.method == 'POST':
-        with connect_db() as conn:
-            cur = conn.cursor()
-            pwd = request.form['password']
-            pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
-            if pwd == pwd_check.fetchone()[0]:
-                deduction = int(request.form['amount'])
-                kid = request.form['child']
-                deduct(kid, deduction)
-                flash("deducted %s from %s" % (deduction, kid))
-            else:
-                error = 'Invalid password'
 
-        return render_template('debit.html', username=username, error=error, children=all_kids)
+        if not check_sys_password(request):
+            error = "Incorrect password"
+            return render_template('debit.html', error=error, children=(request.form['child'],),
+                                   username=request.form['child'])
 
+        deduction = int(request.form['amount'])
+        kid = request.form['child']
+        deduct(kid, deduction)
+        flash("deducted %s from %s" % (deduction, kid))
 
-@app.route('/add_interval/<username>')
-def add_interval(username = None):
-    return render_templated('add_interval.htm', username = username)
+        return redirect(url_for('today'))
 
 
 def get_schedule_for_user(username):
@@ -250,7 +252,6 @@ def get_schedule_for_user(username):
             'off_num': row[2]
         }
 
-
     entries = [row_fmt(row) for row in schedule.fetchall()]
     return cap, entries, debit
 
@@ -268,7 +269,6 @@ def shutdown():
     return redirect(url_for('front_page'))
 
 
-
 @app.route('/overview')
 def overall_schedule():
     results = dict()
@@ -282,6 +282,34 @@ def overall_schedule():
 def get_schedule(username):
     cap, entries, debit = get_schedule_for_user(username)
     return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username)
+
+
+@app.route('/create_interval/<username>', methods=['GET', 'POST'])
+def create_interval(username):
+    error = None
+
+    if request.method == 'GET':
+        dayname = request.args.get('dayname')
+        daynum = request.args.get('daynum')
+        return render_template('add_interval.html', username=username, dayname=dayname, daynum=daynum)
+    else:
+        username = request.form['username']
+
+        if not check_sys_password(request):
+            error = "Incorrect password"
+            return render_template('add_interval.html', username=username,
+                                   error=error, dayname=request.form['dayname'],
+                                   daynum=request.form['daynum'])
+        start_hr, start_min = request.form['start_time'].split(":")
+        end_hr, end_min = request.form['end_time'].split(":")
+        start_num = int(start_hr) + int(start_min) / 60.0
+        end_num = int(end_hr) + int(end_min) / 60.0
+        if start_num >= end_num:
+            error = "End time must be later than start time"
+            return render_template('add_interval.html', username=username,
+                                   error=error, dayname=request.form['dayname'],
+                                   daynum=request.form['daynum'])
+        return str(username) + str(start_num) + str(end_num)
 
 
 @app.route('/update')

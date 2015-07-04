@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h2>Add access time for {{ username}} on {{ dayname }}</h2>
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    <form method="post" action="add">
+        <dl>
+            <dt>create</dt>
+            <dd>
+                Start
+                <input type="time" name=start_time>
+                End
+                <input type="time" name=end_time>
+            </dd>
+        </dl>
+        <dl>
+            <dt>System password:
+            <dd><input type="hidden" name="dayname" value={{dayname }}> </dd>
+            <dd><input type="hidden" name="daynum" value={{ daynum }}></dd>
+            <dd><input type="hidden" name="username" value={{ username }}></dd>
+
+            <dd><input type=password name=password>
+            <input type=submit value=Add></dd>
+        </dl>
+    </form>
+{% endblock %}
