@@ -4,25 +4,14 @@
     <div class="row row-centered">
     {% for kid, sched in entries.items() %}
         <div >
-            <h3> <button type="button" class="btn btn-default" aria-label="Left Align">
-                        <a href="{{ url_for('donate', username=kid) }}">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            </a>
-                    </button>
-                    <button type="button" class="btn btn-default" aria-label="Left Align">
-                        <a href="{{ url_for('apply_debit', username=kid) }}">
-
-                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-                            </a>
-                    </button>
-                {{ kid }} </h3>
+            <h3><a href={{ url_for('get_schedule', username =kid )}}>{{ kid }}<span class="small">...</span> </a> </h3>
             daily maximum = {{ sched[0] }}
             current debt = {{ sched[2] }}
+
             <table class="table table-striped table_bordered table-responsive">
                 {% for eachentry in sched[1] %}
                     <tr>
                         <td>{{ eachentry.day }}</td>
-                        <td>{{ eachentry.add }}</td>
                         <td>{{ eachentry.on | safe }}</td>
                         <td>{{ eachentry.off | safe }}</td>
                     </tr>

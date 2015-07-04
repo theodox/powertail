@@ -209,7 +209,6 @@ def donate(username=None):
         return redirect(url_for('today'))
 
 
-@app.route('/debit/')
 @app.route('/debit/<username>', methods=['GET', 'POST'])
 def apply_debit(username=None):
     error = None
@@ -259,6 +258,7 @@ def get_schedule_for_user(username):
         }
 
     entries = [row_fmt(row) for row in schedule.fetchall()]
+
     return cap, entries, debit
 
 
@@ -287,7 +287,11 @@ def overall_schedule():
 @app.route('/schedule/<username>')
 def get_schedule(username):
     cap, entries, debit = get_schedule_for_user(username)
-    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username)
+    repl = {}
+    for e in entries:
+        repl[e['day']] = e['add']
+    current = current_interval(username)
+    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username, credits = repl, balance = current.balance)
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])
