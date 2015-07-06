@@ -4,19 +4,9 @@
         <div class="container">
             <div class="row row-centered">
                 <h3>
-                    <button type="button" class="btn btn-default" aria-label="Left Align">
-                        <a href="{{ url_for('donate', username=kid) }}">
-                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                            </a>
-                    </button>
-                    <button type="button" class="btn btn-default" aria-label="Left Align">
-                        <a href="{{ url_for('apply_debit', username=kid) }}">
 
-                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-                            </a>
-                    </button>
-
-                    {{ kid }} <span class="small">{{ sched[1] }} / {{ sched[0] }} remaining</span></h3>
+                    <a href={{ url_for('get_schedule', username = kid) }}>
+                    {{ kid }} <span class="small">{{ sched[1] }} / {{ sched[0] }} remaining</span></a></h3>
 
                 <table class="table table-responsive table-bordered table-striped">
                     <tr>

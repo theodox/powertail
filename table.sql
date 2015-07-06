@@ -60,7 +60,7 @@ INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap', 'debit') VALUES
   ('Helen', 'helen', 'flower', 0, 60, 0),
   ('Al', 'al', 'stud', 0, 240, 0),
   ('Daddy', 'dad', 'goggles', 0, 240, 0 ),
-  ('System', 'va4uvu','',  0,0, 0);
+  ('System', '1ipschitz','',  0,0, 0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
   (1, 14.5, 16.5, 'Helen'),
@@ -93,6 +93,4 @@ INSERT INTO replenish (sun, mon, tues, weds, thurs, fri, sat, kids_name) VALUES
   (240, 240, 240, 240, 240, 240, 240, 'Daddy'),
   (30, 30, 30, 30, 30, 30, 30, 'Nicky'),
   (30, 30, 30, 30, 30, 30, 30, 'Helen'),
-  (180, 180, 180, 180, 180, 180, 180, 'Al'),
-  (60, 60, 60, 60, 60, 60, 60, 'guest');
-  
+  (180, 180, 180, 180, 180, 180, 180, 'Al')

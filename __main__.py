@@ -21,14 +21,13 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
 
 # configuration
 
-DEBUG = True
+DEBUG = False
 SECRET_KEY = 'a;lfsh92why'
 USERNAME = 'admin'
 PASSWORD = 'default'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-# todo: the above can be a separate file: see  http://flask.pocoo.org/docs/0.10/tutorial/setup/#tutorial-setup
 
 from  power import PowerManager
 
