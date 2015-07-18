@@ -1,34 +1,32 @@
 __author__ = 'stevet'
 
 from threading import Lock
-import sqlite3
 import time
 from threading import Thread, current_thread, RLock
-import  db
+
+import db
+
 
 class gpio_proxy(object):
     OUT = 1
 
-    def setup(self, pin, val ):
+    def setup(self, pin, val):
         print 'pretending to set pin %i to %s' % (pin, val)
 
     def output(self, pin, val):
         print 'pretending to set pin %i to %s' % (pin, val)
+
 
 try:
     import RPi.GPIO as gpio
 except ImportError:
     gpio = gpio_proxy()
 
-
 gpio.setup(12, gpio.OUT)
 
 
 class PowerTail(object):
-
-
     def __init__(self):
-
         self._state = False
         self._internal_state = self._state
         self.lock = Lock()
@@ -61,7 +59,7 @@ class PowerManager(object):
     DATABASE = '/tmp/flaskr.db'
     INSTANCE = None
 
-    def __init__(self, app, interval = 1.5):
+    def __init__(self, app, interval=1.5):
         self.db = self.DATABASE
         self.tail = PowerTail()
         self.stop = False
@@ -69,7 +67,7 @@ class PowerManager(object):
         self._kid = None
         self.interval = interval
         self.app = app
-        self.started  = False
+        self.started = False
         self._remaining = 0
 
     def get_remaining(self):
@@ -97,9 +95,6 @@ class PowerManager(object):
         with self.lock:
             return self._kid
 
-
-
-
     def check(self):
         while not self.stop:
             self.app.logger.debug("(%s): being %s", current_thread(), self.get_user())
@@ -113,11 +108,12 @@ class PowerManager(object):
                 if ok:
                     fraction = self.interval / 60.0
                     db.deduct(user, fraction)
-                    msg  = self.tail.on()
+                    msg = self.tail.on()
 
                 else:
+                    if user:
+                        self.set_user(None)
                     msg = self.tail.off()
-
             time.sleep(self.interval)
 
         self.tail.off()
@@ -144,6 +140,5 @@ class PowerManager(object):
     def manager(cls, app):
         if not cls.INSTANCE:
             cls.INSTANCE = PowerManager(app)
-
 
         return cls.INSTANCE

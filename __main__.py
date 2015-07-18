@@ -19,16 +19,21 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
 
 
 
+
+
+
+
 # configuration
 
 DEBUG = False
 SECRET_KEY = 'a;lfsh92why'
 USERNAME = 'admin'
 PASSWORD = 'default'
+from datetime import timedelta
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-
+app.permanent_session_lifetime = timedelta(hours=5)
 from  power import PowerManager
 
 manager = None
@@ -49,6 +54,7 @@ def before_request():
     known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
     g.logins = OrderedDict(known_logins)
     g.active_user = manager._kid
+
 
 
 @app.teardown_request
@@ -156,7 +162,7 @@ def login():
 
 @app.route('/direct/')
 @app.route('/direct/<username>', methods=['GET', 'POST'])
-def direct(username = None):
+def direct(username=None):
     error = None
     if request.method == 'POST':
         name = username
@@ -179,6 +185,7 @@ def direct(username = None):
 
     return render_template('login_direct.html', error=error, username=username)
 
+
 @app.route('/change_password/')
 @app.route('/change_password/<username>', methods=['GET', 'POST'])
 def change_pwd(username):
@@ -196,20 +203,24 @@ def change_pwd(username):
         with connect_db() as conn:
             cur = conn.cursor()
             cur.execute("SELECT name, password FROM kids WHERE name = ?", (name,))
+            msg = username
             results = cur.fetchall()
             if results[0][1] != pwd:
-                cur.execute("SELECT name, password FROM kids WHERE name = System")
+                cur.execute("SELECT name, password FROM kids WHERE name = 'System'", tuple())
                 results = cur.fetchall()
                 if results[0][1] != pwd:
                     error = "Invalid password"
                     return render_template('change_password.html', error=error, username=username)
+                else:
+                    msg = 'System user '
 
             cur.execute('UPDATE kids set password = ? WHERE name = ?', (new_1, username))
+            cur.execute("INSERT INTO history (kids_name, event) VALUES (?,?)",
+                        (msg, 'password changed for %s' % username))
             flash('password changed for %s' % username)
             return redirect(url_for('get_schedule', username=username))
 
     return render_template('change_password.html', error=error, username=username)
-
 
 
 @app.route('/donate/')
@@ -322,7 +333,8 @@ def get_schedule(username):
     for e in entries:
         repl[e['day']] = e['add']
     current = current_interval(username)
-    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username, credits = repl, balance = current.balance)
+    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username, credits=repl,
+                           balance=current.balance)
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])
@@ -388,7 +400,7 @@ def delete_interval(username):
         with connect_db() as conn:
             real_day_num = int(daynum)
             print "SELECT * FROM intervals WHERE (kids_name like %s AND day=%s AND turn_on=%s AND turn_off=%s)" % (
-            username, real_day_num, start_num, end_num)
+                username, real_day_num, start_num, end_num)
 
             print conn.cursor().execute(
                 "SELECT * FROM intervals WHERE (kids_name like ? AND day=? AND ABS (turn_on - ?) < .05  AND ABS (turn_off-?) < .05)",
