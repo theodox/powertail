@@ -32,11 +32,15 @@
         </div>
         <div class="row">
             <div class="col-sm-2">
+                <button><a href="{{ url_for('change_pwd', username=username) }}">Change password</a></button>
+            </div>
+            <div class="col-sm-2">
                 <button><a href="{{ url_for('donate', username=username) }}">Add credits</a></button>
             </div>
             <div class="col-sm-2">
                 <button><a href="{{ url_for('apply_debit', username=username) }}">Deduct credits</a></button>
             </div>
+
         </div>
         <div class="container">
             <ul class="list-group">

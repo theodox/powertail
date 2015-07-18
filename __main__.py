@@ -156,7 +156,7 @@ def login():
 
 @app.route('/direct/')
 @app.route('/direct/<username>', methods=['GET', 'POST'])
-def direct(username):
+def direct(username = None):
     error = None
     if request.method == 'POST':
         name = username
@@ -178,6 +178,38 @@ def direct(username):
                 return redirect(url_for('front_page'))
 
     return render_template('login_direct.html', error=error, username=username)
+
+@app.route('/change_password/')
+@app.route('/change_password/<username>', methods=['GET', 'POST'])
+def change_pwd(username):
+    error = None
+    if request.method == 'POST':
+        name = username
+        pwd = request.form.get('old_password', 'no old password')
+        new_1 = request.form.get('new_password_1', 'no new pwd1')
+        new_2 = request.form.get('new_password_2', 'no new pwd2')
+
+        if new_1 != new_2:
+            error = "New passwords do not match"
+            return render_template('change_password.html', error=error, username=name)
+
+        with connect_db() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT name, password FROM kids WHERE name = ?", (name,))
+            results = cur.fetchall()
+            if results[0][1] != pwd:
+                cur.execute("SELECT name, password FROM kids WHERE name = System")
+                results = cur.fetchall()
+                if results[0][1] != pwd:
+                    error = "Invalid password"
+                    return render_template('change_password.html', error=error, username=username)
+
+            cur.execute('UPDATE kids set password = ? WHERE name = ?', (new_1, username))
+            flash('password changed for %s' % username)
+            return redirect(url_for('get_schedule', username=username))
+
+    return render_template('change_password.html', error=error, username=username)
+
 
 
 @app.route('/donate/')
