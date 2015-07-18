@@ -59,7 +59,7 @@ INSERT INTO kids ('name',  'password', 'pic', 'balance', 'cap', 'debit') VALUES
   ('Nicky', 'nicky2', 'swimmer', 0, 120, 0),
   ('Helen', 'helen2', 'flower', 0, 120, 0),
   ('Al', 'al2', 'stud', 0, 240, 0),
-  ('Daddy', 'python', 'goggles', 0, 240, 0 ),
+  ('Daddy', 'mommy', 'goggles', 0, 240, 0 ),
   ('System', '1ipschitz','',  0,0, 0);
 
 INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES
