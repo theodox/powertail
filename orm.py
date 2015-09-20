@@ -5,7 +5,6 @@ import logging
 from collections import namedtuple
 import threading
 
-
 PowerCheck = namedtuple('powercheck', 'on message balance time_left off_time')
 
 from peewee import Model, CharField, TimeField, IntegerField, FloatField, DateTimeField, ForeignKeyField, \
@@ -66,10 +65,6 @@ def setup():
     for t in _TABLES:
         PEEWEE.drop_table(t)
         PEEWEE.create_table(t)
-
-
-
-
 
 
 class PowerServer(object):
@@ -139,7 +134,6 @@ class PowerServer(object):
 
         balance = self.update_balance(elapsed)
         time_to_shutdown = self.get_remaining_time(current_time, intervals, today)
-
         shutdown_delta = min(balance, time_to_shutdown)
         shutdown_delta = timedelta(minutes=shutdown_delta / 60.0)
         shutdown_time = now_dt + shutdown_delta
@@ -147,6 +141,9 @@ class PowerServer(object):
         return 1, "logged in", balance, shutdown_delta, shutdown_time
 
     def get_remaining_time(self, current_time, intervals, today):
+        """
+        return the number of minutes left in the current interval.  If there's a lockout coming before the end of the interval, return the time until then
+        """
         current_interval = intervals[0]
         try:
             possible_lockouts = Lockout.select().where(
@@ -177,6 +174,9 @@ class PowerServer(object):
         return lockouts
 
     def get_current_intervals(self, current_time, today):
+        """
+        Get any intervals for the current user which include today
+        """
         intervals_query = self._user.intervals.select().where(
             (Interval.day == today) &
             (Interval.start < current_time) &
@@ -185,6 +185,9 @@ class PowerServer(object):
         return intervals
 
     def poll(self):
+        """
+        Update loop
+        """
         while self._alive:
             self.check()
             sleep(self.interval)
@@ -199,6 +202,7 @@ class PowerServer(object):
 
     def stop(self):
         self._alive = False
+
 
 setup()
 
