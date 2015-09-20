@@ -1,10 +1,12 @@
 __author__ = 'stevet'
 from time import sleep
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import logging
 from collections import namedtuple
+import threading
 
-PowerCheck = namedtuple('powercheck', 'on message remaining')
+
+PowerCheck = namedtuple('powercheck', 'on message balance time_left off_time')
 
 from peewee import Model, CharField, TimeField, IntegerField, FloatField, DateTimeField, ForeignKeyField, \
     SqliteDatabase, BooleanField, TextField, Check
@@ -41,13 +43,13 @@ class Interval(PowertailMeta):
     user = ForeignKeyField(User, related_name='intervals', on_delete=CASCADE, index=True)
     day = IntegerField(constraints=[Check('day > 0 and day < 7')])
     start = TimeField()
-    end = TimeField()
+    end = TimeField(constraints=[Check('end > start')])
 
 
 class Lockout(PowertailMeta):
     day = IntegerField(constraints=[Check('day > 0 and day < 7')], null=False)
-    start = DateTimeField()
-    end = DateTimeField()
+    start = TimeField()
+    end = TimeField(constraints=[Check('end > start')])
 
 
 class History(PowertailMeta):
@@ -65,23 +67,25 @@ def setup():
         PEEWEE.drop_table(t)
         PEEWEE.create_table(t)
 
-    system = User.create(name='system', password='unset', is_admin=True)
-    al = User.create(name='al', password='al', balance=10.0)
-    system.save()
-    al.save()
-    test = Interval.create(user=al, start=time(17, 10), end=time(19, 15), day=5)
-    test.save()
 
 
-setup()
+
 
 
 class PowerServer(object):
-    def __init__(self, peewee_db):
+    def __init__(self, peewee_db, interval=30.0):
+        self.interval = interval
         self.database = peewee_db
+        self._alive = False
         self._system = User.select().where(User.name % "system" and User.is_admin == True).get()
         self._user = None
         self._last_check = None
+        self._status = PowerCheck(0, 'starting', -1, timedelta(), datetime.now())
+
+    @property
+    def status(self):
+        with threading.Lock(self):
+            return self._status
 
     def login(self, user_name):
         if self._user is not None:
@@ -95,8 +99,8 @@ class PowerServer(object):
                 self.log('unable to log in %s' % user_name)
                 return 0
 
-    def logout(self):
-        self.log('logged out', user=self._user)
+    def logout(self, message="logged out"):
+        self.log(message, user=self._user)
         self._user = None
 
     def log(self, message, user=None):
@@ -107,49 +111,112 @@ class PowerServer(object):
             LOGGING.info(message)
 
     def check(self):
+        """
+        check the database for the to see if the status is on and if so, how much time is left
+        """
         now_dt = datetime.now()
-
         if self._last_check is None:
             self._last_check = datetime.now()
             elapsed = 0.0
         else:
             elapsed = (now_dt - self._last_check).seconds / 60.0
             self._last_check = datetime.now()
-
         today = now_dt.weekday()
         current_time = now_dt.time()
 
         if self._user is None:
-            return -1, "Not logged in", -1
+            return -1, "Not logged in", -1, -1, -1
 
-        lockouts = [i for i in Lockout.select().where(
-            Lockout.day == today and Lockout.start < current_time and Lockout.end > current_time)]
+        lockouts = self.get_current_lockouts(current_time, today)
         if lockouts:
-            return 0, "Locked Out", -1
+            self.logout("logged off: locked out")
+            return 0, "locked out", -1, -1, -1
 
-        intervals = [i for i in self._user.intervals.select().where(
-            Interval.day == today and Interval.start < current_time and Interval.end > current_time)]
+        intervals = self.get_current_intervals(current_time, today)
         if not intervals:
-            self.logout()
-            return 0, "No interval", -1
+            self.logout("logged off: no interval")
+            return 0, "no interval", -1, -1, -1
 
+        balance = self.update_balance(elapsed)
+        time_to_shutdown = self.get_remaining_time(current_time, intervals, today)
+
+        shutdown_delta = min(balance, time_to_shutdown)
+        shutdown_delta = timedelta(minutes=shutdown_delta / 60.0)
+        shutdown_time = now_dt + shutdown_delta
+
+        return 1, "logged in", balance, shutdown_delta, shutdown_time
+
+    def get_remaining_time(self, current_time, intervals, today):
+        current_interval = intervals[0]
+        try:
+            possible_lockouts = Lockout.select().where(
+                (Lockout.day == today) & (Lockout.start < current_interval.end)).get()
+            current_interval.end = possible_lockouts.start
+            # this model data is NOT SAVED, it's just used to calculate remaining time
+        except:
+            # no intervening lockouts
+            pass
+        remaining_in_interval = (current_interval.end.minute - current_time.minute) + \
+                                ((current_interval.end.hour - current_time.hour) * 60)
+        return remaining_in_interval
+
+    def update_balance(self, elapsed):
         balance = self._user.balance - elapsed
         balance = round(balance, 2)
         balance = max(balance, 0)
         self._user.balance = balance
         self._user.save()
+        return balance
 
-        current_interval = intervals[0]
-        remaining_in_interval = (current_interval.end.minute - current_time.minute) + \
-                                ((current_interval.end.hour - current_time.hour) * 60)
+    def get_current_lockouts(self, current_time, today):
+        lockout_query = Lockout.select().where(
+            (Lockout.day == today) &
+            (Lockout.start < current_time) &
+            (Lockout.end > current_time))
+        lockouts = tuple((i for i in lockout_query))
+        return lockouts
 
-        return 1, "logged in", min(balance, remaining_in_interval)
+    def get_current_intervals(self, current_time, today):
+        intervals_query = self._user.intervals.select().where(
+            (Interval.day == today) &
+            (Interval.start < current_time) &
+            (Interval.end > current_time))
+        intervals = tuple((i for i in intervals_query))
+        return intervals
 
+    def poll(self):
+        while self._alive:
+            self.check()
+            sleep(self.interval)
+            LOGGING.info(self._status)
+        self.log("server shutdown")
+
+    def start(self):
+        self._alive = True
+        worker_thread = threading.Thread(None, target=self.poll)
+        worker_thread.daemon = True
+        worker_thread.start()
+
+    def stop(self):
+        self._alive = False
+
+setup()
+
+PEEWEE.connect()
+system = User.create(name='system', password='unset', is_admin=True)
+al = User.create(name='al', password='al', balance=10.0)
+system.save()
+al.save()
+test = Interval.create(user=al, start=time(17, 10), end=time(22, 15), day=5)
+test.save()
+
+test_lockout = Lockout.create(day=5, start=time(20, 20), end=time(21, 00))
+test_lockout.save()
 
 xxx = PowerServer(PEEWEE)
 xxx.login('al')
 for n in range(10):
-    print xxx.check()
+    print PowerCheck(*xxx.check())
     sleep(5)
 xxx.logout()
 xxx.login('dummy')
