@@ -16,6 +16,7 @@ LOGGING = logging.getLogger('powertail')
 LOGGING.addHandler(logging.StreamHandler())
 LOGGING.setLevel(1)
 
+
 def same_day_delta(time1, time2):
     first = datetime.combine(datetime.today(), time1)
     second = datetime.combine(datetime.today(), time2)
@@ -278,8 +279,6 @@ class TestORM(TestCase):
 
         result = PowerCheck(*self.server.check())
         assert result.on == 1
-        print result
-        print end_time
         assert result.off_time.hour == end_time.hour and result.off_time.minute == end_time.minute
         assert result.balance == 10.0
         assert round((result.time_left.seconds / 60.0), 2) == 6.0
@@ -300,7 +299,7 @@ class TestORM(TestCase):
         assert result.on == 1
         assert result.balance == -1
         assert result.off_time == tmp.expires
-        assert result.time_left.seconds >= 418 and result.time_left.seconds <= 420
+        assert 420 >= result.time_left.seconds >= 418
 
         FreeTime.delete().execute()
         assert PowerCheck(*self.server.check()).on == -1
@@ -318,14 +317,56 @@ class TestORM(TestCase):
         result = PowerCheck(*self.server.check())
         assert result.on == 1
         ll = Lockout.create(start=time(start_time.hour, start_time.minute),
-                       end=time(end_time.hour, end_time.minute),
-                       day=start_time.weekday())
+                            end=time(end_time.hour, end_time.minute),
+                            day=start_time.weekday())
         ll.save()
         result = PowerCheck(*self.server.check())
-        assert  result.on == 0
-        assert  result.balance == -1
+        assert result.on == 0
+        assert result.balance == -1
         # the time left in this calculation is going to vary between 5 and 6 minutes due to rounding.
-        assert  result.time_left.seconds >= 299 and result.time_left.seconds <= 359
+        assert 359 >= result.time_left.seconds >= 299
+
+    def test_multiple_lockouts(self):
+        start_time = datetime.now() - timedelta(minutes=1)
+        end_time = datetime.now() + timedelta(minutes=6)
+        end_time2 = datetime.now() + timedelta(minutes=2)
+
+        test = Interval.create(user=self.test_user,
+                               start=start_time.time(),
+                               end=end_time.time(),
+                               day=start_time.weekday())
+        test.save()
+        self.server.login('al')
+
+        result = PowerCheck(*self.server.check())
+        assert result.on == 1
+
+        early = Lockout.create(start=start_time.time(),
+                               end=end_time2.time(),
+                               day=start_time.weekday()
+                               )
+        early.save()
+
+        ll = Lockout.create(start=start_time.time(),
+                            end=end_time.time(),
+                            day=start_time.weekday())
+        ll.save()
+        result = PowerCheck(*self.server.check())
+        assert result.on == 0
+        assert result.balance == -1
+        # should still report the end of the last lockout
+        assert 359 >= result.time_left.seconds >= 299
+
+    def test_lockout_clear(self):
+        backdate = datetime.now() - timedelta(days=1)
+        ll = Lockout.create(day = 1, start = time(0,1), end = time(2,3), expires = backdate)
+        ll.save()
+        self.server.clear_old_lockouts()
+        remainder = [i for i in Lockout.select()]
+        assert len(remainder) == 0
+
+
+
 
 
     def setUp(self):
