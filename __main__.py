@@ -15,11 +15,8 @@ from db import connect_db, init_db, display_time, current_interval, add_credits,
 
 
 
-
-
-
-
-
+from orm.model import User, PEEWEE, setup
+from orm.server import PowerServer
 
 
 
@@ -38,6 +35,15 @@ from  power import PowerManager
 
 manager = None
 
+#TEST CODE
+setup()
+sysad = User.create(name = 'system', password= 'system', is_admin = True)
+sysad.save()
+al = User.create(name = 'al', password = 'test', picture = 'stud')
+al.save()
+
+
+server = PowerServer(PEEWEE)
 
 def check_sys_password(request):
     with connect_db() as conn:
@@ -49,19 +55,26 @@ def check_sys_password(request):
 
 @app.before_request
 def before_request():
-    g.db = connect_db()
+
+    PEEWEE.connect()
+    _user_query = User.select().order_by(User.name)
+    _user_pics = [ (u.name,  u.picture) for u in _user_query]
+    g.logins = OrderedDict(_user_pics)
+#    g.server_status = server.status
+ #   g.server_user = server.active_user
+
+
+    #g.db = connect_db()
     g.g_time = time.strftime("%I:%M %p")
-    known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
-    g.logins = OrderedDict(known_logins)
+    #known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
+    #g.logins = OrderedDict(known_logins)
     g.active_user = manager._kid
 
 
 
 @app.teardown_request
 def teardown_request(exception):
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
+    PEEWEE.close()
 
 
 @app.route('/')

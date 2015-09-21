@@ -18,7 +18,7 @@ class TestORM(TestCase):
                                end=time(end_time.hour, end_time.minute),
                                day=start_time.weekday())
         test.save()
-        self.server.login('al')
+        self.server.set_user('al')
 
         result = PowerCheck(*self.server.check())
         assert result.on == 1
@@ -27,7 +27,7 @@ class TestORM(TestCase):
         assert round((result.time_left.seconds / 60.0), 2) == 6.0
 
     def test_no_login(self):
-        self.server.login('nicky')
+        self.server.set_user('nicky')
         result = PowerCheck(*self.server.check())
         assert result.on == -1
         assert result.balance == -1
@@ -35,7 +35,7 @@ class TestORM(TestCase):
         assert result.time_left == -1
 
     def test_temporary(self):
-        self.server.logout()
+        self.server.unset_user()
         tmp = FreeTime.create(expires=datetime.now() + timedelta(minutes=7))
         tmp.save()
         result = PowerCheck(*self.server.check())
@@ -55,7 +55,7 @@ class TestORM(TestCase):
                                end=time(end_time.hour, end_time.minute),
                                day=start_time.weekday())
         test.save()
-        self.server.login('al')
+        self.server.set_user('al')
 
         result = PowerCheck(*self.server.check())
         assert result.on == 1
@@ -79,7 +79,7 @@ class TestORM(TestCase):
                                end=end_time.time(),
                                day=start_time.weekday())
         test.save()
-        self.server.login('al')
+        self.server.set_user('al')
 
         result = PowerCheck(*self.server.check())
         assert result.on == 1

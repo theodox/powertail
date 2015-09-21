@@ -21,6 +21,7 @@ class User(PowertailMeta):
     cap = FloatField(default=60, constraints=[Check('cap >= 0')])
     is_admin = BooleanField(default=False)
     last_login = DateTimeField(default=datetime.now)
+    picture = CharField(default="porp")
 
 
 class Replenish(PowertailMeta):

@@ -1,6 +1,6 @@
 __author__ = 'stevet'
 from time import sleep
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 from collections import namedtuple
 import threading
 
@@ -12,7 +12,6 @@ from peewee import SqliteDatabase
 
 CASCADE = 'cascade'
 PEEWEE = SqliteDatabase('powertail_2.db')
-
 
 
 def time_difference(time1, time2):
@@ -36,9 +35,14 @@ class PowerServer(object):
         with threading.Lock(self):
             return self._status
 
-    def login(self, user_name):
+    @property
+    def active_user(self):
+        with threading.Lock(self):
+            return self._user
+
+    def set_user(self, user_name):
         if self._user is not None:
-            self.logout()
+            self.unset_user()
         with self.database.atomic():
             try:
                 self._user = User.select().where(User.name % user_name).get()
@@ -48,7 +52,7 @@ class PowerServer(object):
                 self.log('unable to log in %s' % user_name)
                 return 0
 
-    def logout(self, message="logged out"):
+    def unset_user(self, message="logged out"):
         self.log(message, user=self._user)
         self._user = None
 
@@ -58,6 +62,19 @@ class PowerServer(object):
             msg = History.create(user=user, message=message)
             msg.save()
             LOGGING.info(message)
+
+    def validate_user(self, user, password):
+        """
+        return a tuple True/False, message.  True is a valid login, false is not, message explains why
+        """
+        with self.database.atomic():
+            try:
+                user_object = User.select().where((User.name % user)).get()
+                if password == user.password:
+                    return True, ""
+                return False, "incorrect password"
+            except:
+                return False, "incorrect user name %s" % user
 
     def check(self):
         """
@@ -89,13 +106,13 @@ class PowerServer(object):
         # locked out?
         lockouts = self.get_current_lockouts(current_time, today)
         if lockouts:
-            self.logout("logged off: locked out")
+            self.unset_user("logged off: locked out")
             return lockouts
 
         # no allowed block for this user?
         intervals = self.get_current_intervals(current_time, today)
         if not intervals:
-            self.logout("logged off: no interval")
+            self.unset_user("logged off: no interval")
             return 0, "no interval", -1, -1, -1
 
         # update balance, calculate shut down time
@@ -183,7 +200,6 @@ class PowerServer(object):
         intervals = tuple((i for i in intervals_query))
         return intervals
 
-
     def update_balance(self, elapsed):
         """
         update the user's balance to reflect elapsed time
@@ -224,5 +240,3 @@ class PowerServer(object):
 
     def stop(self):
         self._alive = False
-
-
