@@ -3,6 +3,7 @@ __author__ = 'stevet'
 from threading import Lock
 import time
 from threading import Thread, current_thread, RLock
+import orm
 
 import db
 
@@ -53,6 +54,10 @@ class PowerTail(object):
                 gpio.output(12, self._internal_state)
             return self._internal_state
         return None
+
+
+
+
 
 
 class PowerManager(object):

@@ -29,32 +29,35 @@ class PowerServer(object):
         self._user = None
         self._last_check = None
         self._status = PowerCheck(0, 'starting', -1, timedelta(), datetime.now())
+        self._lock = threading.Lock()
 
     @property
     def status(self):
-        with threading.Lock(self):
+        with self._lock:
             return self._status
 
     @property
     def active_user(self):
-        with threading.Lock(self):
+        with self._lock:
             return self._user
 
     def set_user(self, user_name):
-        if self._user is not None:
-            self.unset_user()
-        with self.database.atomic():
-            try:
-                self._user = User.select().where(User.name % user_name).get()
-                self.log('logged in', user=self._user)
-                return 1
-            except:
-                self.log('unable to log in %s' % user_name)
-                return 0
+        with self._lock:
+            if self._user is not None:
+                self.unset_user()
+            with self.database.atomic():
+                try:
+                    self._user = User.select().where(User.name % user_name).get()
+                    self.log('logged in', user=self._user)
+                    return 1
+                except:
+                    self.log('unable to log in %s' % user_name)
+                    return 0
 
     def unset_user(self, message="logged out"):
-        self.log(message, user=self._user)
-        self._user = None
+        with self._lock:
+            self.log(message, user=self._user)
+            self._user = None
 
     def log(self, message, user=None):
         user = user or self._system

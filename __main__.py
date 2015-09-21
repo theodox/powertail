@@ -60,7 +60,11 @@ def before_request():
     _user_query = User.select().order_by(User.name)
     _user_pics = [ (u.name,  u.picture) for u in _user_query]
     g.logins = OrderedDict(_user_pics)
-#    g.server_status = server.status
+    try:
+        g.server_status = server.status
+    except:
+        import traceback
+        print traceback.format_exc()
  #   g.server_user = server.active_user
 
 
@@ -459,4 +463,4 @@ if __name__ == '__main__':
 
         manager = PowerManager.manager(app)
         manager.monitor()
-        app.run(host=('0.0.0.0'), use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5003,  use_reloader=False)
