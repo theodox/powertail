@@ -7,22 +7,15 @@ from flask import Flask, request, session, g, redirect, url_for, render_template
 
 from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary, deduct, \
     clear_temporary
-
-
-
-
-
-
-
-
 from orm.model import User, PEEWEE, setup
 from orm.server import PowerServer
 
 
 
+
 # configuration
 
-DEBUG = False
+DEBUG = True
 SECRET_KEY = 'a;lfsh92why'
 USERNAME = 'admin'
 PASSWORD = 'default'
@@ -35,45 +28,38 @@ from  power import PowerManager
 
 manager = None
 
-#TEST CODE
+# TEST CODE
 setup()
-sysad = User.create(name = 'system', password= 'system', is_admin = True)
+sysad = User.create(name='system', password='system', is_admin=True)
 sysad.save()
-al = User.create(name = 'al', password = 'test', picture = 'stud')
+al = User.create(name='al', password='test', picture='stud')
 al.save()
-
 
 server = PowerServer(PEEWEE)
 
+
 def check_sys_password(request):
-    with connect_db() as conn:
-        cur = conn.cursor()
-        pwd = request.form['password']
-        pwd_check = cur.execute("SELECT password FROM kids WHERE name = 'System'")
-        return pwd_check.fetchone()[0] == pwd
+    pwd = request.form['password']
+    return server.validate_user('system', pwd)
 
 
 @app.before_request
 def before_request():
-
     PEEWEE.connect()
     _user_query = User.select().order_by(User.name)
-    _user_pics = [ (u.name,  u.picture) for u in _user_query]
+    _user_pics = [(u.name, u.picture) for u in _user_query]
     g.logins = OrderedDict(_user_pics)
-    try:
-        g.server_status = server.status
-    except:
-        import traceback
-        print traceback.format_exc()
- #   g.server_user = server.active_user
+    server.poll()  ##>>>> TEST CODE REMOVE
 
+    g.server_status = server.status
+    g.minutes_remaining = server.status.time_left.seconds / 60.0
+    g.shutdown_time = server.status.off_time.strftime("%I:%M %p")
 
-    #g.db = connect_db()
+    g.active_user = None
+    if server.active_user is not None:
+        g.active_user = server.active_user.name
+
     g.g_time = time.strftime("%I:%M %p")
-    #known_logins = g.db.execute('SELECT name, pic FROM kids WHERE name  != "System" ORDER BY NAME ').fetchall()
-    #g.logins = OrderedDict(known_logins)
-    g.active_user = manager._kid
-
 
 
 @app.teardown_request
@@ -81,20 +67,18 @@ def teardown_request(exception):
     PEEWEE.close()
 
 
+
 @app.route('/')
 def front_page():
     news = []
 
-    user = manager._kid or "logged out"
-    state = "ON" if manager.state() else "OFF"
-    interval = current_interval(manager._kid)
-    remaining = int(min(interval.balance, interval.remaining) + .5)
-    if remaining > 60:
-        remaining = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
-    else:
-        remaining = "{} minutes".format(remaining)
+    user = g.active_user or "logged out"
+    state = "ON" if g.server_status.on  else "OFF"
+    remaining = format_remaining_time(g.minutes_remaining)
+    off_time = g.server_status.off_time
+
     clock = time.strftime("%I:%M %p")
-    news = OrderedDict(user=user, state=state, remaining=remaining, time=clock)
+    news = OrderedDict(user=user, state=state, remaining=remaining, time=clock, off_time = off_time)
     if state == "ON":
         flash("tv is on")
     return render_template('main.html', news=news)
@@ -102,16 +86,14 @@ def front_page():
 
 @app.route('/history')
 def show_history():
-    cur = g.db.execute('SELECT time, kids_name, event FROM history ORDER BY time DESC LIMIT 100')
-    entries = [dict(time=row[0][5:-3], kid=row[1], msg=row[2]) for row in cur.fetchall()]
+    entries = server.history()
     return render_template('history.html', entries=entries)
 
 
 @app.route('/users')
 def users():
-    cur = g.db.execute('select name, balance, cap, replenished, debit from kids WHERE name NOT  like "System"')
-    entries = [dict(kid=row[0], balance=row[1], cap=row[2], replenished=row[3], debit=-1 * row[4]) for row in
-               cur.fetchall()]
+
+    entries = server.users()
     return render_template('users.html', kids=entries)
 
 
@@ -122,15 +104,15 @@ def extend():
         return render_template('extend.html', error=error)
     if request.method == 'POST':
 
-        if not check_sys_password(request):
-            error = "Incorrect password"
+        valid, reason = check_sys_password(request)
+        if not valid:
+            error = reason
             return render_template('extend.html', error=error)
 
-        with connect_db() as conn:
-            extra_minutes = int(request.form['amount'])
-            add_temporary(extra_minutes)
-            flash("TV will stay on for %s minutes" % extra_minutes)
-            return redirect(url_for('front_page'))
+        extra_minutes = int(request.form['amount'])
+        server.add_temporary(extra_minutes)
+        flash("TV will stay on for %s minutes" % extra_minutes)
+        return redirect(url_for('front_page'))
 
 
 @app.route('/today')
@@ -153,6 +135,7 @@ def today():
     return render_template('today.html', entries=results)
 
 
+'''
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -175,6 +158,7 @@ def login():
                 flash('You were logged in')
                 return redirect(url_for('front_page'))
     return render_template('login.html', error=error)
+'''
 
 
 @app.route('/direct/')
@@ -185,21 +169,17 @@ def direct(username=None):
         name = username
         pwd = request.form['password']
 
-        with connect_db() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT name, password FROM kids WHERE name like ?", (name,))
-            results = cur.fetchall()
-            if len(results) == 0:
-                error = "Invalid username"
-            elif results[0][1] != pwd:
-                error = "Invalid password"
-            else:
-                session['logged_in'] = True
-                session['username'] = name
-                manager.set_user(name)
-                flash('You were logged in')
-                return redirect(url_for('front_page'))
+        valid, reason = server.validate_user(name, pwd)
 
+        if valid:
+            server.set_user(name)
+            session['logged_in'] = True
+            session['username'] = name
+            manager.set_user(name)
+            flash('%s logged in', name)
+            return redirect(url_for('front_page'))
+        else:
+            error = reason
     return render_template('login_direct.html', error=error, username=username)
 
 
@@ -435,21 +415,25 @@ def delete_interval(username):
 def update():
     user = manager._kid or "logged out"
     state = "ON" if manager.state() else "OFF"
-    interval = current_interval(manager._kid)
-    remaining = int(min(interval.balance, interval.remaining) + .5)
+    remaining = g.minutes_remaining
+    display = format_remaining_time(remaining)
+    clock = time.strftime("%I:%M %p")
+    return jsonify(user=user, state=state, remaining=display, time=clock, minutes=remaining)
+
+
+def format_remaining_time(remaining):
     if remaining > 60:
         display = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
     else:
         display = "{} minutes".format(remaining)
-    clock = time.strftime("%I:%M %p")
-    return jsonify(user=user, state=state, remaining=display, time=clock, minutes=remaining)
+    return display
 
 
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
     session.pop('username')
-    manager.set_user(None)
+    server.unset_user('logged out by user')
     flash('You were logged out')
     return redirect(url_for('front_page'))
 
@@ -463,4 +447,4 @@ if __name__ == '__main__':
 
         manager = PowerManager.manager(app)
         manager.monitor()
-        app.run(host=('0.0.0.0'), port=5003,  use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5005, use_reloader=False)

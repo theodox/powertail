@@ -2,7 +2,7 @@
 {% block body %}
   <table class="table table-striped">
   {% for entry in entries%}
-     <tr><td>{{ entry.time }}</td><td>{{ entry.kid }}</td><td>{{ entry.msg }}</td></tr>
+     <tr><td>{{ entry.time }}</td><td>{{ entry.user.name }}</td><td>{{ entry.message }}</td></tr>
   {% endfor %}
   </table>
 {% endblock %}

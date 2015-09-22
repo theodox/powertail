@@ -1,13 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-  <table class="table table-striped table-bordered">
-  <tr><th>user</th><th>balance</th><th>max</th><th>debit</th></th><th>updated</th></tr>
-  {% for kid in kids%}
-     <tr><td><a href="{{ url_for('get_schedule', username=kid.kid)}}" >{{ kid.kid }}</a></td><td>{{ kid.balance|safe }}</td><td>{{ kid.cap }}</td>
-         <td>{{ kid.debit|safe }}</td>
-         <td>{{ kid.replenished }}</td></tr>
-  {% endfor %}
-  </table>
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>user</th>
+                <th>balance</th>
+                <th>max</th>
+                <th>debit</th>
+                </th>
+                <th>updated</th>
+            </tr>
+            {% for kid in kids %}
+                <tr>
+                    <td><a href="{{ url_for('get_schedule', username=kid.name) }}">{{ kid.name }}</a></td>
+                    <td>{{ kid.balance|safe }}</td>
+                    <td>{{ kid.cap }}</td>
+                    <td>{{ kid.is_admin }}</td>
+                </tr>
+            {% endfor %}
+        </table>
     </div>
 {% endblock %}
