@@ -9,6 +9,7 @@ from orm.model import *
 
 class TestORM(TestCase):
     TEST_USER = 'al'
+    TEST_PWD = 'la'
 
     def test_login(self):
         start_time = datetime.now() - timedelta(minutes=1)
@@ -114,13 +115,12 @@ class TestORM(TestCase):
         test_rollover = datetime.combine(test_day, test_hr)
         al = User.select().where(User.name == 'system').get()
         original_balance = al.balance
-        test_repl = Replenish.create(user=al, amount=99, upcoming=test_rollover)
+        test_repl = Replenish.create(user=al, amount=9, upcoming=test_rollover)
         test_repl.save()
         self.server.replenish()
         repl = Replenish.select().get()
-        print repl.user.balance, repl.upcoming
         assert repl.upcoming == test_rollover + timedelta(days=7)
-        assert repl.user.balance == original_balance + 99
+        assert repl.user.balance == original_balance + 9
 
     def test_replenish_daily(self):
         test_day = date.today()
@@ -128,18 +128,31 @@ class TestORM(TestCase):
         test_rollover = datetime.combine(test_day, test_hr)
         al = User.select().where(User.name == 'system').get()
         original_balance = al.balance
-        test_repl = Replenish.create(user=al, amount=99, upcoming=test_rollover, rollover = 1)
+        test_repl = Replenish.create(user=al, amount=9, upcoming=test_rollover, rollover = 1)
         test_repl.save()
         self.server.replenish()
         repl = Replenish.select().get()
         assert repl.upcoming == test_rollover + timedelta(days=1)
-        assert repl.user.balance == original_balance + 99
+        assert repl.user.balance == original_balance + 9
+
+    def test_validate_user(self):
+        test_valid_ok = self.server.validate_user(self.TEST_USER, self.TEST_PWD)
+        assert test_valid_ok[0]
+
+    def test_validate_bad_user(self):
+        test_valid_ok = self.server.validate_user('ssdsdsfefg', self.TEST_PWD)
+        assert not test_valid_ok[0]
+
+    def test_validate_bad_pwd(self):
+        test_valid_ok = self.server.validate_user(self.TEST_USER, 'sdsf123')
+        assert not test_valid_ok[0]
+
 
     def setUp(self):
         setup()
         PEEWEE.connect()
         system = User.create(name='system', password='unset', is_admin=True)
-        self.test_user = User.create(name=self.TEST_USER, password='al', balance=10.0)
+        self.test_user = User.create(name=self.TEST_USER, password=self.TEST_PWD, balance=10.0)
         system.save()
         self.test_user.save()
         self.server = PowerServer(PEEWEE)

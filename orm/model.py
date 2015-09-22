@@ -33,14 +33,14 @@ class Replenish(PowertailMeta):
 
 class Interval(PowertailMeta):
     user = ForeignKeyField(User, related_name='intervals', on_delete=CASCADE)
-    day = IntegerField(constraints=[Check('day > 0 and day < 7')])
+    day = IntegerField(constraints=[Check('day >= 0 and day < 7')])
     start = TimeField()
     end = TimeField(constraints=[Check('end > start')])
     expires = DateTimeField(null=True)
 
 
 class Lockout(PowertailMeta):
-    day = IntegerField(constraints=[Check('day > 0 and day < 7')], null=False)
+    day = IntegerField(constraints=[Check('day >= 0 and day < 7')], null=False)
     start = TimeField()
     end = TimeField(constraints=[Check('end > start')])
     expires = DateTimeField(default=datetime(2099, 12, 31))

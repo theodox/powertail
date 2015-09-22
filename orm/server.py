@@ -70,13 +70,12 @@ class PowerServer(object):
         """
         return a tuple True/False, message.  True is a valid login, false is not, message explains why
         """
-        with self.database.atomic():
-            try:
-                user_object = User.select().where((User.name % user)).get()
-                if password == user.password:
-                    return True, ""
-                return False, "incorrect password"
-            except:
+        try:
+            user_object = User.select().where((User.name == user)).get()
+            if password == user_object.password:
+                return True, ""
+            return False, "incorrect password"
+        except User.DoesNotExist:
                 return False, "incorrect user name %s" % user
 
     def check(self):
@@ -222,8 +221,24 @@ class PowerServer(object):
             r.user.balance += r.amount
             r.user.balance = min(r.user.balance, r.user.cap)
             r.user.save()
-            r.upcoming = r.upcoming + timedelta(r.rollover)
+            r.upcoming = r.upcoming + timedelta(days=r.rollover)
             r.save()
+
+    @PEEWEE.atomic()
+    def add_temporary(self, minutes):
+        now = datetime.now()
+        expires = now + timedelta(minutes=minutes)
+        new_time = FreeTime.create(expires=expires)
+        new_time.save()
+        return True
+
+
+    def history(self, limit = 100):
+        return History.select().limit(limit)
+
+
+    def users(self):
+        return User.select()
 
     def poll(self):
         """
