@@ -5,10 +5,12 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from db import connect_db, init_db, display_time, current_interval, add_credits, time_fmt, add_temporary, deduct, \
+from db import connect_db, init_db, display_time, add_credits, deduct, \
     clear_temporary
-from orm.model import User, PEEWEE, setup
+from orm.model import User, PEEWEE, setup, Interval
 from orm.server import PowerServer
+
+
 
 
 
@@ -34,8 +36,12 @@ sysad = User.create(name='system', password='system', is_admin=True)
 sysad.save()
 al = User.create(name='al', password='test', picture='stud')
 al.save()
+for r in range(7):
+    dummy = Interval.create(user=al, day=r, start=datetime.time(01, 01), end=datetime.time(20, 0))
+    dummy.save()
 
-server = PowerServer(PEEWEE)
+server = PowerServer(PEEWEE, 10)
+server.start()
 
 
 def check_sys_password(request):
@@ -49,7 +55,6 @@ def before_request():
     _user_query = User.select().order_by(User.name)
     _user_pics = [(u.name, u.picture) for u in _user_query]
     g.logins = OrderedDict(_user_pics)
-    server.poll()  ##>>>> TEST CODE REMOVE
 
     g.server_status = server.status
     g.minutes_remaining = server.status.time_left.seconds / 60.0
@@ -67,6 +72,14 @@ def teardown_request(exception):
     PEEWEE.close()
 
 
+@app.route('/update')
+def update():
+    return jsonify(user=g.active_user,
+                   state=g.server_status.on,
+                   time=g.g_time,
+                   minutes=round(g.minutes_remaining,0),
+                   shutoff=g.server_status.off_time)
+
 
 @app.route('/')
 def front_page():
@@ -76,9 +89,7 @@ def front_page():
     state = "ON" if g.server_status.on  else "OFF"
     remaining = format_remaining_time(g.minutes_remaining)
     off_time = g.server_status.off_time
-
-    clock = time.strftime("%I:%M %p")
-    news = OrderedDict(user=user, state=state, remaining=remaining, time=clock, off_time = off_time)
+    news = OrderedDict(user=user, state=state, remaining=remaining, off_time=off_time, timetoda=g.g_time)
     if state == "ON":
         flash("tv is on")
     return render_template('main.html', news=news)
@@ -92,7 +103,6 @@ def show_history():
 
 @app.route('/users')
 def users():
-
     entries = server.users()
     return render_template('users.html', kids=entries)
 
@@ -110,55 +120,17 @@ def extend():
             return render_template('extend.html', error=error)
 
         extra_minutes = int(request.form['amount'])
-        server.add_temporary(extra_minutes)
+        print server.add_temporary(extra_minutes)
         flash("TV will stay on for %s minutes" % extra_minutes)
         return redirect(url_for('front_page'))
 
 
 @app.route('/today')
 def today():
-    day_num = int(time.strftime("%w"))
-    now = datetime.datetime.now()
-    test = now.hour + (now.minute / 60.0)
-    results = dict()
-    users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
-    users = [k[0] for k in users]
-    for u in users:
-        interval = current_interval(u)
-        cap, entries, debit = get_schedule_for_user(u)
-        today = [e for e in entries if e['day_num'] == day_num]
-        for e in today:
-            e['valid'] = e['off_num'] > test
-        if today:
-            results[u] = time_fmt(cap), time_fmt(interval.balance), today, time_fmt(-1 * debit)
+    day_num = datetime.datetime.now().weekday()
+    intervals = server.day_schedule(day_num)
 
-    return render_template('today.html', entries=results)
-
-
-'''
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        name = request.form['username']
-        pwd = request.form['password']
-
-        with connect_db() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT name, password FROM kids WHERE name like ?", (name,))
-            results = cur.fetchall()
-            if len(results) == 0:
-                error = "Invalid username"
-            elif results[0][1] != pwd:
-                error = "Invalid password"
-            else:
-                session['logged_in'] = True
-                session['username'] = name
-                manager.set_user(name)
-                flash('You were logged in')
-                return redirect(url_for('front_page'))
-    return render_template('login.html', error=error)
-'''
+    return render_template('today.html', entries=intervals)
 
 
 @app.route('/direct/')
@@ -276,31 +248,6 @@ def apply_debit(username=None):
         return redirect(url_for('today'))
 
 
-def get_schedule_for_user(username):
-    cap, debit = g.db.execute('select cap, debit from kids WHERE name LIKE ?', (username,)).fetchone()
-    replenish = g.db.execute('select * from replenish where kids_name LIKE ?', (username,))
-    repl = replenish.fetchone()[1:-1]
-    day_names = 'Sun Mon Tue Wed Thu Fri Sat'.split()
-    schedule = g.db.execute('select  day, turn_on, turn_off from intervals WHERE kids_name LIKE ? order by day',
-                            (username,))
-
-    def row_fmt(row):
-        day = row[0] - 1
-        return {
-            'day': day_names[day],
-            'on': display_time(row[1]),
-            'off': display_time(row[2]),
-            'add': repl[day],
-            'day_num': day,
-            'on_num': row[1],
-            'off_num': row[2]
-        }
-
-    entries = [row_fmt(row) for row in schedule.fetchall()]
-
-    return cap, entries, debit
-
-
 @app.route('/off')
 def shutdown():
     try:
@@ -310,28 +257,20 @@ def shutdown():
 
     clear_temporary()
     flash('tv shut down')
-
     return redirect(url_for('front_page'))
 
 
 @app.route('/overview')
 def overall_schedule():
-    results = dict()
-    users = g.db.execute("SELECT name FROM kids WHERE NAME NOT LIKE 'System'").fetchall()
-    for k in users:
-        results[k[0]] = get_schedule_for_user(k[0])
+    results = dict([(u, server.user_schedule(u)) for u in g.logins.keys()])
     return render_template('overall_schedule.html', entries=results)
 
 
 @app.route('/schedule/<username>')
 def get_schedule(username):
-    cap, entries, debit = get_schedule_for_user(username)
-    repl = {}
-    for e in entries:
-        repl[e['day']] = e['add']
-    current = current_interval(username)
-    return render_template('schedule.html', cap=cap, entries=entries, debit=debit, username=username, credits=repl,
-                           balance=current.balance)
+    entries = server.user_schedule(username)
+    user = User.select().where((User.name == username)).get()
+    return render_template('schedule.html', cap=user.cap, entries=entries, username=username, balance=user.balance)
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])
@@ -411,16 +350,6 @@ def delete_interval(username):
         return redirect(url_for('get_schedule', username=username))
 
 
-@app.route('/update')
-def update():
-    user = manager._kid or "logged out"
-    state = "ON" if manager.state() else "OFF"
-    remaining = g.minutes_remaining
-    display = format_remaining_time(remaining)
-    clock = time.strftime("%I:%M %p")
-    return jsonify(user=user, state=state, remaining=display, time=clock, minutes=remaining)
-
-
 def format_remaining_time(remaining):
     if remaining > 60:
         display = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
@@ -447,4 +376,4 @@ if __name__ == '__main__':
 
         manager = PowerManager.manager(app)
         manager.monitor()
-        app.run(host=('0.0.0.0'), port=5005, use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5006, use_reloader=False)

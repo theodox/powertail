@@ -110,11 +110,11 @@
     <script type="text/javascript">
         function updateTime() {
             $.getJSON('/update', function (latest) {
-                        $('#remaining').html(latest.remaining)
-                        if (latest.minutes > 0) {
+                        console.warn(latest);
+                        $('#remaining').html(latest.minutes);
+                        if (latest.state == 1) {
                             $('#powerbadge').html("ON");
                             if (latest.minutes > 5) {
-
                                 $('#powerbutton').addClass("btn-success");
                             }
                             else {

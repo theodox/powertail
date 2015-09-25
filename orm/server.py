@@ -5,6 +5,7 @@ from collections import namedtuple
 import threading
 
 from orm.model import *
+from orm.model import *
 
 PowerCheck = namedtuple('powercheck', 'on message balance time_left off_time')
 
@@ -103,7 +104,7 @@ class PowerServer(object):
 
         # not logged in?
         if self._user is None:
-            return -1, "Not logged in", -1, -1, -1
+            return -1, "Not logged in", 0, timedelta(seconds=0), self._last_check
 
         # locked out?
         lockouts = self.get_current_lockouts(current_time, today)
@@ -115,7 +116,7 @@ class PowerServer(object):
         intervals = self.get_current_intervals(current_time, today)
         if not intervals:
             self.unset_user("logged off: no interval")
-            return 0, "no interval", -1, -1, -1
+            return 0, "no interval", 0, timedelta(seconds=0), self._last_check
 
         # update balance, calculate shut down time
         balance = self.update_balance(elapsed)
@@ -230,23 +231,32 @@ class PowerServer(object):
         expires = now + timedelta(minutes=minutes)
         new_time = FreeTime.create(expires=expires)
         new_time.save()
-        return True
-
+        self.log('free time until {0}:{1}'.format(expires.hour, expires.minute))
+        return new_time
 
     def history(self, limit = 100):
         return History.select().limit(limit)
 
-
     def users(self):
-        return User.select()
+        return tuple((i for i in User.select()))
+
+    def user_schedule(self, user_name):
+        user_intevals = Interval.select().where((Interval.user.name == user_name))
+        return tuple((i for i in user_intevals))
+
+    def day_schedule(self, daynumber):
+        active_intervals = Interval.select().where((Interval.day == daynumber))
+        result = dict((i.user.name, []) for i in active_intervals )
+        for k in active_intervals:
+            result[k.user.name].append(k)
+        return result
 
     def poll(self):
         """
         Update loop
         """
         while self._alive:
-            self.check()
-            sleep(self.interval)
+            self._status = PowerCheck (*self.check())
             LOGGING.info(self._status)
         self.log("server shutdown")
 
