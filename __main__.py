@@ -83,16 +83,7 @@ def update():
 
 @app.route('/')
 def front_page():
-    news = []
-
-    user = g.active_user or "logged out"
-    state = "ON" if g.server_status.on  else "OFF"
-    remaining = format_remaining_time(g.minutes_remaining)
-    off_time = g.server_status.off_time
-    news = OrderedDict(user=user, state=state, remaining=remaining, off_time=off_time, timetoda=g.g_time)
-    if state == "ON":
-        flash("tv is on")
-    return render_template('main.html', news=news)
+    return render_template('main.html')
 
 
 @app.route('/history')
