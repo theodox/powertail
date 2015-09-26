@@ -73,85 +73,87 @@
         </div>
     </nav>
 </div>
+<!--- end navbar --->
+
 <div class="container">
     <div class="col-sm-12">
         <div class="row">
             {% for k, v in g.logins.items() %}
-                {% if k == g.active_user %}
-                    <div class="col-lg-3 col-md-6 col-xs-6 thumb selected">
-                {% else %}
-                    <div class="col-lg-3 col-md-6 col-xs-6 thumb">
-                {% endif %}
-            <a href="{{ url_for('direct', username=k) }}">
-                <img src="{{ url_for('static', filename = v + '.JPG') }}" class="img-rounded img-responsive">
-            </a>
-            </div>
-
+                <div class={% if k == g.active_user %}"col-lg-3 col-md-6 col-xs-6 thumb selected" {% else %} "col-lg-3 col-md-6 col-xs-6 thumb" {% endif %}>
+                <a href="{{ url_for('direct', username=k) }}">
+                    <img src="{{ url_for('static', filename = v + '.JPG') }}" class="img-rounded img-responsive">
+                </a>
+                </div>
             {% endfor %}
-            </div>
-        </div>
-        <div>
-            {% block body %}{% endblock %}
-        </div>
-        <div>
-            <div id="messages">
-                {% for message in get_flashed_messages() %}
-                    <div class=flash>
-                        <p class="bg-success">{{ message }}</p></div>
-                {% endfor %}
-            </div>
-            <script type=text/javascript>
-                $('.flash').show().fadeOut(4000)
-            </script>
-        </div>
 
     </div>
+</div>
+<!--- end login section --->
 
-    <script type="text/javascript">
-        function updateTime() {
-            $.getJSON('/update', function (latest) {
-                        console.warn(latest);
-                        $('#remaining').html(latest.minutes);
-                        if (latest.state == 1) {
-                            $('#powerbadge').html("ON");
-                            if (latest.minutes > 5) {
-                                $('#powerbutton').addClass("btn-success");
-                            }
-                            else {
-                                $('#powerbutton').addClass("btn-warning");
-                            }
+<div class="center-block">
+    {% block body %}
+    {% endblock %}
+</div>
+<!--- end body -->
+<div class="center-block">
+    <div id="messages">
+        {% for message in get_flashed_messages() %}
+            <div class=flash>
+                <p class="bg-success">{{ message }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <script type=text/javascript>
+        $('.flash').show().fadeOut(4000)
+    </script>
+</div>
+<!--- end flash block -->
+
+<script type="text/javascript">
+    function updateTime() {
+        $.getJSON('/update', function (latest) {
+                    $('#remaining').html(latest.minutes);
+                    if (latest.state == 1) {
+                        $('#powerbadge').html("ON");
+                        if (latest.minutes > 5) {
+                            $('#powerbutton').addClass("btn-success");
                         }
                         else {
-                            $('#powerbadge').html('OFF');
-                            $('#powerbutton').addClass("btn-default");
+                            $('#powerbutton').addClass("btn-warning");
                         }
                     }
-            )
-        }
-        ;
-
-        setInterval(updateTime, 1000);
-    </script>
-
-    <script type=text/javascript>
-        $(function () {
-                    updateTime();
+                    else {
+                        $('#powerbadge').html('OFF');
+                        $('#powerbutton').addClass("btn-default");
+                    }
                 }
         )
-    </script>
-    <script type=text/javascript>
-        $(function () {
-                    var path = window.location.pathname.slice(1);
-                    $("#" + path).last().addClass("active");
-                }
-        )
-    </script>
-    <script type=text/javascript>
-        $(function () {
-                    $("#powerbutton").onclick  = function() {alert("hello");};
-                }
-        )
-    </script>
+    }
+    ;
 
-</div>
+    setInterval(updateTime, 1000);
+</script>
+
+<script type=text/javascript>
+    $(function () {
+                updateTime();
+            }
+    )
+</script>
+<script type=text/javascript>
+    $(function () {
+                var path = window.location.pathname.slice(1);
+                $("#" + path).last().addClass("active");
+            }
+    )
+</script>
+<script type=text/javascript>
+    $(function () {
+                $("#powerbutton").onclick = function () {
+                    alert("hello");
+                };
+            }
+    )
+</script>
+
 </html>
