@@ -55,15 +55,12 @@ def before_request():
     _user_query = User.select().order_by(User.name)
     _user_pics = [(u.name, u.picture) for u in _user_query]
     g.logins = OrderedDict(_user_pics)
-
     g.server_status = server.status
     g.minutes_remaining = server.status.time_left.seconds / 60.0
     g.shutdown_time = server.status.off_time.strftime("%I:%M %p")
-
     g.active_user = None
     if server.active_user is not None:
         g.active_user = server.active_user.name
-
     g.g_time = time.strftime("%I:%M %p")
 
 
@@ -71,15 +68,16 @@ def before_request():
 def teardown_request(exception):
     PEEWEE.close()
 
-
 @app.route('/update')
 def update():
+    """
+    Live update loop
+    """
     return jsonify(user=g.active_user,
                    state=g.server_status.on,
                    time=g.g_time,
                    minutes=round(g.minutes_remaining,0),
                    shutoff=g.server_status.off_time)
-
 
 @app.route('/')
 def front_page():
@@ -111,8 +109,9 @@ def extend():
             return render_template('extend.html', error=error)
 
         extra_minutes = int(request.form['amount'])
-        print server.add_temporary(extra_minutes)
+        server.add_temporary(extra_minutes)
         flash("TV will stay on for %s minutes" % extra_minutes)
+        server.refresh()
         return redirect(url_for('front_page'))
 
 
@@ -140,6 +139,8 @@ def direct(username=None):
             session['username'] = name
             manager.set_user(name)
             flash('%s logged in', name)
+            server.refresh()
+
             return redirect(url_for('front_page'))
         else:
             error = reason
@@ -247,7 +248,9 @@ def shutdown():
         pass
 
     clear_temporary()
+
     flash('tv shut down')
+    server.refresh()
     return redirect(url_for('front_page'))
 
 
@@ -355,6 +358,8 @@ def logout():
     session.pop('username')
     server.unset_user('logged out by user')
     flash('You were logged out')
+    server.refresh()
+
     return redirect(url_for('front_page'))
 
 

@@ -22,7 +22,7 @@ def time_difference(time1, time2):
 
 
 class PowerServer(object):
-    def __init__(self, peewee_db, interval=30.0):
+    def __init__(self, peewee_db, interval=12.0):
         self.interval = interval
         self.database = peewee_db
         self._alive = False
@@ -60,13 +60,14 @@ class PowerServer(object):
             self.log(message, user=self._user)
             self._user = None
 
+    @PEEWEE.atomic()
     def log(self, message, user=None):
         user = user or self._system
-        with self.database.atomic():
-            msg = History.create(user=user, message=message)
-            msg.save()
-            LOGGING.info(message)
+        msg = History.create(user=user, message=message)
+        msg.save()
+        LOGGING.info(message)
 
+    @PEEWEE.atomic()
     def validate_user(self, user, password):
         """
         return a tuple True/False, message.  True is a valid login, false is not, message explains why
@@ -203,6 +204,7 @@ class PowerServer(object):
         intervals = tuple((i for i in intervals_query))
         return intervals
 
+    @PEEWEE.atomic()
     def update_balance(self, elapsed):
         """
         update the user's balance to reflect elapsed time
@@ -234,22 +236,31 @@ class PowerServer(object):
         self.log('free time until {0}:{1}'.format(expires.hour, expires.minute))
         return new_time
 
+    @PEEWEE.atomic()
     def history(self, limit = 100):
         return History.select().limit(limit)
 
+    @PEEWEE.atomic()
     def users(self):
         return tuple((i for i in User.select()))
 
+    @PEEWEE.atomic()
     def user_schedule(self, user_name):
         user_intevals = Interval.select().where((Interval.user.name == user_name))
         return tuple((i for i in user_intevals))
 
+    @PEEWEE.atomic()
     def day_schedule(self, daynumber):
         active_intervals = Interval.select().where((Interval.day == daynumber))
         result = dict((i.user.name, []) for i in active_intervals )
         for k in active_intervals:
             result[k.user.name].append(k)
         return result
+
+    @PEEWEE.atomic()
+    def refresh(self):
+        self._status = PowerCheck (*self.check())
+
 
     def poll(self):
         """
@@ -258,6 +269,7 @@ class PowerServer(object):
         while self._alive:
             self._status = PowerCheck (*self.check())
             LOGGING.info(self._status)
+            sleep(self.interval)
         self.log("server shutdown")
 
     def start(self):
