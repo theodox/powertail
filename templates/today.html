@@ -1,27 +1,25 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="center-block">
-        {% for user in entries %}
-            <div class="container">
-                <div class="row row-centered">
-                    <h3>
-                        <a href={{ url_for('get_schedule', username = user) }}>{{ user }}</a>
-                    </h3>
+    {% for user in entries %}
+        <div class="container">
+            <div class="row row-centered">
+                <h3>
+                    <a href={{ url_for('get_schedule', username = user) }}>{{ user }}</a>
+                </h3>
 
-                    <table class="table table-responsive table-bordered table-striped">
+                <table class="table table-responsive table-bordered table-striped">
+                    <tr>
+                        <th>start</th>
+                        <th>end</th>
+                    </tr>
+                    {% for eachentry in entries[user] %}
                         <tr>
-                            <th>start</th>
-                            <th>end</th>
+                            <td>{{ eachentry.start.strftime("%I:%M %p") |safe }}</td>
+                            <td>{{eachentry.end.strftime("%I:%M %p") | safe }}</td>
                         </tr>
-                        {% for eachentry in entries[user] %}
-                            <tr>
-                                <td>{{ eachentry.start |safe }}</td>
-                                <td>{{ eachentry.end | safe }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
+                    {% endfor %}
+                </table>
             </div>
-        {% endfor %}
-    </div>
+        </div>
+    {% endfor %}
 {% endblock %}
