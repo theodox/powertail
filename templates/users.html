@@ -6,16 +6,16 @@
                 <th>user</th>
                 <th>balance</th>
                 <th>max</th>
-                <th>debit</th>
-                </th>
                 <th>updated</th>
+                <th>admin</th>
             </tr>
             {% for kid in kids %}
                 <tr>
                     <td><a href="{{ url_for('get_schedule', username=kid.name) }}">{{ kid.name }}</a></td>
                     <td>{{ kid.balance|safe }}</td>
-                    <td>{{ kid.cap }}</td>
-                    <td>{{ kid.is_admin }}</td>
+                    <td>{{ kid.cap | safe}}</td>
+                    <td>{{ kid.updates | safe }}</td>
+                    <td>{{ kid.is_admin  | safe }}</td>
                 </tr>
             {% endfor %}
         </table>

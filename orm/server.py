@@ -5,7 +5,6 @@ from collections import namedtuple
 import threading
 
 from orm.model import *
-from orm.model import *
 
 PowerCheck = namedtuple('powercheck', 'on message balance time_left off_time')
 
@@ -78,7 +77,7 @@ class PowerServer(object):
                 return True, ""
             return False, "incorrect password"
         except User.DoesNotExist:
-                return False, "incorrect user name %s" % user
+            return False, "incorrect user name %s" % user
 
     def check(self):
         """
@@ -237,7 +236,7 @@ class PowerServer(object):
         return new_time
 
     @PEEWEE.atomic()
-    def history(self, limit = 100):
+    def history(self, limit=100):
         return History.select().limit(limit)
 
     @PEEWEE.atomic()
@@ -246,28 +245,51 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def user_schedule(self, user_name):
-        user_intevals = Interval.select().where((Interval.user.name == user_name))
-        return tuple((i for i in user_intevals))
+        u = User.select().where(User.name == user_name).get()
+        intervals = Interval.select().where(Interval.user == u).order_by(Interval.day, Interval.start)
+        return tuple(intervals)
 
     @PEEWEE.atomic()
     def day_schedule(self, daynumber):
-        active_intervals = Interval.select().where((Interval.day == daynumber))
-        result = dict((i.user.name, []) for i in active_intervals )
+        active_intervals = Interval.select().where((Interval.day == daynumber)).order_by(Interval.user, Interval.start)
+        result = dict((i.user.name, []) for i in active_intervals)
         for k in active_intervals:
             result[k.user.name].append(k)
         return result
 
     @PEEWEE.atomic()
     def refresh(self):
-        self._status = PowerCheck (*self.check())
+        self._status = PowerCheck(*self.check())
 
+    @PEEWEE.atomic()
+    def add_interval(self, user_name, day, start, end):
+        u = User.select().where((User.name) == user_name).get()
+        i = Interval.create(User=u, start=start, end=end, day=day)
+        i.save()
+        self.log("Added new interval for {0}: day {1}, start {2}, end {3}".format(user_name, day, start, end))
+        return i
+
+    @PEEWEE.atomic()
+    def clear_free_time(self):
+        FreeTime.delete().execute()
+        self.log("Free time cleared")
+
+    @PEEWEE.atomic()
+    def remove_interval(self, interval):
+        interval.delete()
+        self.log("Interval deleted for %s " % interval.user.name)
+
+    @PEEWEE.atomic()
+    def edit_interval(self, interval, new_start, new_end):
+        interval.update(start=new_start, end=new_end)
+        interval.save()
 
     def poll(self):
         """
         Update loop
         """
         while self._alive:
-            self._status = PowerCheck (*self.check())
+            self._status = PowerCheck(*self.check())
             LOGGING.info(self._status)
             sleep(self.interval)
         self.log("server shutdown")

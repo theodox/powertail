@@ -46,6 +46,11 @@ class Lockout(PowertailMeta):
     expires = DateTimeField(default=datetime(2099, 12, 31))
 
 
+class Borrowed(PowertailMeta):
+    user = ForeignKeyField(User, related_name='borrowings', on_delete=CASCADE)
+    expires = DateTimeField(default=datetime(2000, 01, 01))
+
+
 class FreeTime(PowertailMeta):
     expires = DateTimeField(null=True)
 

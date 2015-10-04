@@ -1,10 +1,12 @@
 {% extends "layout.html" %}
 {% block body %}
-    <div class="center-block">
-  <table class="table table-striped">
-  {% for entry in entries%}
-     <tr><td>{{ entry.time }}</td><td>{{ entry.user.name }}</td><td>{{ entry.message }}</td></tr>
-  {% endfor %}
-  </table>
-    </div>
+    <table class="table table-striped">
+        {% for entry in entries %}
+            <tr>
+                <td>{{ entry.time }}</td>
+                <td>{{ entry.user.name }}</td>
+                <td>{{ entry.message }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

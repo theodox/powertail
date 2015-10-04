@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-    {% for user in entries %}
-        <div class="container">
+    <div class="container">
+        {% for user in entries %}
             <div class="row row-centered">
                 <h3>
                     <a href={{ url_for('get_schedule', username = user) }}>{{ user }}</a>
@@ -20,6 +20,6 @@
                     {% endfor %}
                 </table>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 {% endblock %}s

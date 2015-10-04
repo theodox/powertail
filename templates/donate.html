@@ -1,7 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h2>Add Time</h2>
-    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    <h3>Add Time</h3>
     <form method="post" action="donate">
         <dl>
             <dt>Add time</dt>
@@ -30,4 +29,6 @@
             <dd><input type=submit value=Login>
         </dl>
     </form>
+    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
 {% endblock %}

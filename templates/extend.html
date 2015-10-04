@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h2>Add Time</h2>
+    <h3>Add Time</h3>
+
     <form method="post" action="extend">
         <dl>
             <dt>Give time</dt>
@@ -23,5 +24,4 @@
         </dl>
     </form>
     {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-
 {% endblock %}

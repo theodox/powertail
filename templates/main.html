@@ -3,6 +3,7 @@
     <title>PowerTail</title>
 {% endblock %}
 {% block body %}
+    <!-- audio -->
     <script type=text/javascript>
         function beep() {
             document.getElementById("notification").play();
@@ -13,4 +14,5 @@
     <audio style="display: none;" id="notification" preload
            src="static/Zen Temple Bell-SoundBible.com-2070036999.mp3">
     </audio>
+    <!-- end audio -->
 {% endblock %}

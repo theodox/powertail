@@ -5,10 +5,12 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from db import connect_db, init_db, display_time, add_credits, deduct, \
-    clear_temporary
-from orm.model import User, PEEWEE, setup, Interval
+from db import connect_db, init_db, display_time, add_credits, deduct
+from orm.model import User, PEEWEE, setup, Interval, Replenish
 from orm.server import PowerServer
+
+
+
 
 
 
@@ -34,11 +36,23 @@ manager = None
 setup()
 sysad = User.create(name='system', password='system', is_admin=True)
 sysad.save()
+helen = User.create(name='helen', password='test', picture='flower')
+helen.save()
+
 al = User.create(name='al', password='test', picture='stud')
 al.save()
+al_r = Replenish.create(user=al, amount=10, upcoming=datetime.datetime.now() + timedelta(minutes=10))
+al_r.save()
 for r in range(7):
     dummy = Interval.create(user=al, day=r, start=datetime.time(01, 01), end=datetime.time(20, 0))
     dummy.save()
+tmp = Interval.create(user=al,
+                day=0,
+                start=datetime.time(10, 0),
+                end = datetime.time(11, 30),
+                expires = datetime.datetime.now() + datetime.timedelta(hours=24)
+                )
+tmp.save()
 
 server = PowerServer(PEEWEE, 10)
 server.start()
@@ -66,7 +80,10 @@ def before_request():
 
 @app.teardown_request
 def teardown_request(exception):
+    if exception:
+        server.log(exception)
     PEEWEE.close()
+
 
 @app.route('/update')
 def update():
@@ -76,8 +93,9 @@ def update():
     return jsonify(user=g.active_user,
                    state=g.server_status.on,
                    time=g.g_time,
-                   minutes=round(g.minutes_remaining,0),
+                   minutes=round(g.minutes_remaining, 0),
                    shutoff=g.server_status.off_time)
+
 
 @app.route('/')
 def front_page():
@@ -119,11 +137,9 @@ def extend():
 def today():
     day_num = datetime.datetime.now().weekday()
     intervals = server.day_schedule(day_num)
-
     return render_template('today.html', entries=intervals)
 
 
-@app.route('/direct/')
 @app.route('/direct/<username>', methods=['GET', 'POST'])
 def direct(username=None):
     error = None
@@ -138,7 +154,7 @@ def direct(username=None):
             session['logged_in'] = True
             session['username'] = name
             manager.set_user(name)
-            flash('%s logged in', name)
+            flash('%s logged in' % name)
             server.refresh()
 
             return redirect(url_for('front_page'))
@@ -215,18 +231,10 @@ def donate(username=None):
 @app.route('/debit/<username>', methods=['GET', 'POST'])
 def apply_debit(username=None):
     error = None
-    with connect_db() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM kids")
-        all_kids = [i[0] for i in cur.fetchall()]
     if request.method == 'GET':
-        if username:
-            return render_template('debit.html', error=error, children=(username,))
-        else:
-            return render_template('debit.html', error=error, children=all_kids)
+        return render_template('debit.html', error=error, children=(username,))
 
     elif request.method == 'POST':
-
         if not check_sys_password(request):
             error = "Incorrect password"
             return render_template('debit.html', error=error, children=(request.form['child'],),
@@ -242,22 +250,21 @@ def apply_debit(username=None):
 
 @app.route('/off')
 def shutdown():
-    try:
-        logout()
-    except:
-        pass
-
-    clear_temporary()
-
+    server.clear_free_time()
     flash('tv shut down')
     server.refresh()
-    return redirect(url_for('front_page'))
+    if g.active_user:
+        return logout()
+    else:
+        return redirect(url_for('front_page'))
 
 
 @app.route('/overview')
-def overall_schedule():
-    results = dict([(u, server.user_schedule(u)) for u in g.logins.keys()])
-    return render_template('overall_schedule.html', entries=results)
+def overview():
+    _users = User.select().order_by(User.name)
+
+    results = OrderedDict([(u, server.user_schedule(u.name)) for u in _users])
+    return render_template('overview.html', entries=results)
 
 
 @app.route('/schedule/<username>')
@@ -372,4 +379,4 @@ if __name__ == '__main__':
 
         manager = PowerManager.manager(app)
         manager.monitor()
-        app.run(host=('0.0.0.0'), port=5006, use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5000, use_reloader=False)
