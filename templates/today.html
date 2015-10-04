@@ -4,9 +4,13 @@
         {% for user in entries %}
             <div class="row row-centered">
                 <h3>
-                    <a href={{ url_for('get_schedule', username = user) }}>{{ user }}</a>
+                    <a href={{ url_for('get_schedule', username = user.name) }}>{{ user.name }}</a>
                 </h3>
-
+                {% if user.balance > 0 %}
+                    {{ user.balance }} minutes available
+            {% else %}
+                No time available
+            {% endif %}
                 <table class="table table-responsive table-bordered table-striped">
                     <tr>
                         <th>start</th>

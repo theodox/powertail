@@ -3,7 +3,7 @@
     <table class="table table-striped">
         {% for entry in entries %}
             <tr>
-                <td>{{ entry.time }}</td>
+                <td>{{ entry.time.strftime("%I:%M %p") }}</td>
                 <td>{{ entry.user.name }}</td>
                 <td>{{ entry.message }}</td>
             </tr>

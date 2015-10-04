@@ -200,36 +200,32 @@ def change_pwd(username):
     return render_template('change_password.html', error=error, username=username)
 
 
-@app.route('/donate/')
 @app.route('/donate/<username>', methods=['GET', 'POST'])
 def donate(username=None):
     error = None
-    with connect_db() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM kids")
-        all_kids = [i[0] for i in cur.fetchall()]
+
     if request.method == 'GET':
-        if username:
-            return render_template('donate.html', error=error, children=(username,))
-        else:
-            return render_template('donate.html', error=error, children=all_kids)
+        return render_template('donate.html', error=error, children=(username,))
 
     elif request.method == 'POST':
 
         if not check_sys_password(request):
             error = "Incorrect password"
-            return render_template('donate.html', error=error, children=(request.form['child'],),
+            return render_template('donate.html',
+                                   error=error,
+                                   children=(request.form['child'],),
                                    username=request.form['child'])
 
         extra = int(request.form['amount'])
-        kid = request.form['child']
-        add_credits(kid, extra)
-        flash("added %s to %s" % (extra, kid))
+        user = request.form['child']
+        server.gift_time(user, extra)
+        flash("added %s to %s" % (extra, user))
+        server.refresh()
         return redirect(url_for('today'))
 
 
 @app.route('/debit/<username>', methods=['GET', 'POST'])
-def apply_debit(username=None):
+def debit(username=None):
     error = None
     if request.method == 'GET':
         return render_template('debit.html', error=error, children=(username,))
@@ -237,14 +233,16 @@ def apply_debit(username=None):
     elif request.method == 'POST':
         if not check_sys_password(request):
             error = "Incorrect password"
-            return render_template('debit.html', error=error, children=(request.form['child'],),
+            return render_template('debit.html',
+                                   error=error,
+                                   children=(request.form['child'],),
                                    username=request.form['child'])
 
         deduction = int(request.form['amount'])
-        kid = request.form['child']
-        deduct(kid, deduction)
-        flash("deducted %s from %s" % (deduction, kid))
-
+        user = request.form['child']
+        server.gift_time(user, -1 * deduction)
+        flash("deducted %s from %s" % (deduction, user))
+        server.refresh()
         return redirect(url_for('today'))
 
 

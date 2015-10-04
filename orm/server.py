@@ -1,7 +1,7 @@
 __author__ = 'stevet'
 from time import sleep
 from datetime import timedelta
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import threading
 
 from orm.model import *
@@ -83,6 +83,7 @@ class PowerServer(object):
         """
         check the database for the to see if the status is on and if so, how much time is left
         """
+
         # delete any expired temporary lockouts or intervals
         self.clear_old_lockouts()
         self.clear_old_intervals()
@@ -106,6 +107,10 @@ class PowerServer(object):
         if self._user is None:
             return -1, "Not logged in", 0, timedelta(seconds=0), self._last_check
 
+        # re-get the user in case server balance was edited
+        with PEEWEE.atomic():
+            self._user = User.select().where(User.name == self._user.name).get()
+
         # locked out?
         lockouts = self.get_current_lockouts(current_time, today)
         if lockouts:
@@ -120,6 +125,11 @@ class PowerServer(object):
 
         # update balance, calculate shut down time
         balance = self.update_balance(elapsed)
+
+        if balance < 0:
+            self.unset_user("logged off: out of time")
+            return 0, "out of time", 0, timedelta(seconds=0), self._last_check
+
         time_to_shutdown = self.get_remaining_time(current_time, intervals, today)
         shutdown_delta = min(balance, time_to_shutdown)
         shutdown_delta = timedelta(seconds=shutdown_delta * 60.0)
@@ -210,7 +220,6 @@ class PowerServer(object):
         """
         balance = self._user.balance - elapsed
         balance = round(balance, 2)
-        balance = max(balance, 0)
         self._user.balance = balance
         self._user.save()
         return balance
@@ -220,11 +229,24 @@ class PowerServer(object):
         to_be_replenished = Replenish.select().where(Replenish.upcoming < datetime.now()).join(User)
 
         for r in to_be_replenished:
-            r.user.balance += r.amount
-            r.user.balance = min(r.user.balance, r.user.cap)
-            r.user.save()
+            # if there are bonus minutes, don't drop to cap
+            # but don't go past either
+            if r.user.balance < r.user.cap:
+                r.user.balance += r.amount
+                r.user.balance = min(r.user.balance, r.user.cap)
+                r.user.save()
             r.upcoming = r.upcoming + timedelta(days=r.rollover)
             r.save()
+
+    @PEEWEE.atomic()
+    def gift_time(self, user, amount):
+        _u = User.select().where(User.name == user).get()
+        _u.balance = _u.balance + amount
+        _u.save()
+        if amount > 0:
+            self.log("added %s minutes to %s" % (amount, user))
+        else:
+            self.log("deducted %s minutes from %s" % (amount, user))
 
     @PEEWEE.atomic()
     def add_temporary(self, minutes):
@@ -252,9 +274,9 @@ class PowerServer(object):
     @PEEWEE.atomic()
     def day_schedule(self, daynumber):
         active_intervals = Interval.select().where((Interval.day == daynumber)).order_by(Interval.user, Interval.start)
-        result = dict((i.user.name, []) for i in active_intervals)
+        result = OrderedDict((i.user, []) for i in active_intervals)
         for k in active_intervals:
-            result[k.user.name].append(k)
+            result[k.user].append(k)
         return result
 
     @PEEWEE.atomic()
@@ -267,7 +289,6 @@ class PowerServer(object):
         i = Interval.create(User=u, start=start, end=end, day=day)
         i.save()
         self.log("Added new interval for {0}: day {1}, start {2}, end {3}".format(user_name, day, start, end))
-        return i
 
     @PEEWEE.atomic()
     def clear_free_time(self):

@@ -2,17 +2,18 @@
 {% block body %}
     <form method="post" action="donate">
         <dl>
-            <dt>Add time</dt>
+            <dt>Deduct time</dt>
             <dd>
-                Give
+                Take
                 <select name="amount">
                     <option value="5">5 minutes</option>
                     <option value="15">15 minutes</option>
                     <option value="30">30 minutes</option>
                     <option value="60">1 hour</option>
                     <option value="120">2 hour</option>
+
                 </select>
-                to
+                from
                 <select name="child">
                     {% for child in children %}
                         <option value="{{ child }}">{{ child }}</option>
