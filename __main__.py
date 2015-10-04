@@ -5,9 +5,10 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from db import connect_db, init_db, display_time, add_credits, deduct
+from db import connect_db, init_db, display_time
 from orm.model import User, PEEWEE, setup, Interval, Replenish
 from orm.server import PowerServer
+
 
 
 
@@ -47,11 +48,11 @@ for r in range(7):
     dummy = Interval.create(user=al, day=r, start=datetime.time(01, 01), end=datetime.time(20, 0))
     dummy.save()
 tmp = Interval.create(user=al,
-                day=0,
-                start=datetime.time(10, 0),
-                end = datetime.time(11, 30),
-                expires = datetime.datetime.now() + datetime.timedelta(hours=24)
-                )
+                      day=0,
+                      start=datetime.time(10, 0),
+                      end=datetime.time(11, 30),
+                      expires=datetime.datetime.now() + datetime.timedelta(hours=24)
+                      )
 tmp.save()
 
 server = PowerServer(PEEWEE, 10)
@@ -268,8 +269,15 @@ def overview():
 @app.route('/schedule/<username>')
 def get_schedule(username):
     entries = server.user_schedule(username)
+    replenish = server.user_replenish(username)
     user = User.select().where((User.name == username)).get()
-    return render_template('schedule.html', cap=user.cap, entries=entries, username=username, balance=user.balance)
+
+    return render_template('schedule.html',
+                           cap=user.cap,
+                           entries=entries,
+                           username=username,
+                           balance=user.balance,
+                           replenish = replenish)
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])

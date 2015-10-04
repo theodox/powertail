@@ -2,16 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1965d514-62b9-4242-ace9-5e61365cb2cf" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/templates/debit.html" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/templates/tmp.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/powertail_2.db" afterPath="$PROJECT_DIR$/powertail_2.db" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/__main__.py" afterPath="$PROJECT_DIR$/__main__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/donate.html" afterPath="$PROJECT_DIR$/templates/donate.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/extend.html" afterPath="$PROJECT_DIR$/templates/extend.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/history.html" afterPath="$PROJECT_DIR$/templates/history.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/schedule.html" afterPath="$PROJECT_DIR$/templates/schedule.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/orm/server.py" afterPath="$PROJECT_DIR$/orm/server.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/today.html" afterPath="$PROJECT_DIR$/templates/today.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="untitled.iws" />
@@ -38,7 +33,7 @@
     <SUITE FILE_PATH="coverage/powertail$Unittest_TestORM_test_replenish_daily.coverage" NAME="Unittest TestORM.test_replenish_daily Coverage Results" MODIFIED="1442893064249" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/orm" />
     <SUITE FILE_PATH="coverage/powertail$Unittest_TestORM_test_replenish.coverage" NAME="Unittest TestORM.test_replenish Coverage Results" MODIFIED="1442808557004" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/orm" />
     <SUITE FILE_PATH="coverage/powertail$Unittests_in_orm.coverage" NAME="Unittests in orm Coverage Results" MODIFIED="1442774507511" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/powertail$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1443987286671" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/powertail$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1443993571560" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/powertail$Unittest_TestORM_test_validate_user.coverage" NAME="Unittest TestORM.test_validate_user Coverage Results" MODIFIED="1442893033992" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/orm" />
     <SUITE FILE_PATH="coverage/powertail$Unittests_in_orm__3_.coverage" NAME="Unittests in orm (3) Coverage Results" MODIFIED="1442774464843" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/powertail$orm.coverage" NAME="orm Coverage Results" MODIFIED="1442772398532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -67,24 +62,23 @@
     <favorites_list name="untitled" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.76339024">
+    <splitter split-orientation="horizontal" split-proportion="0.53972924">
       <split-first>
         <leaf>
           <file leaf-file-name="__main__.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/__main__.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="-3.4074075">
-                  <caret line="117" column="10" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="10" />
+                  <caret line="118" column="10" selection-start-line="118" selection-start-column="4" selection-end-line="118" selection-end-column="10" />
                   <folding>
-                    <element signature="e#0#10#0" expanded="true" />
-                    <marker date="1443985241000" expanded="true" signature="4970:5016" placeholder="SELECT name,..kids..." />
-                    <marker date="1443985241000" expanded="true" signature="5158:5211" placeholder="SELECT name,..kids..." />
-                    <marker date="1443985241000" expanded="true" signature="5540:5583" placeholder="UPDATE kids ..." />
-                    <marker date="1443985241000" expanded="true" signature="5630:5681" placeholder="INSERT INTO ..." />
-                    <marker date="1443985241000" expanded="true" signature="9697:9782" placeholder="INSERT INTO ..." />
-                    <marker date="1443985241000" expanded="true" signature="11430:11521" placeholder="SELECT * FRO..intervals..." />
-                    <marker date="1443985241000" expanded="true" signature="11646:11760" placeholder="SELECT * FRO..intervals..." />
-                    <marker date="1443985241000" expanded="true" signature="11889:12001" placeholder="DELETE FROM ..." />
+                    <marker date="1443993505000" expanded="true" signature="4976:5022" placeholder="SELECT name,..kids..." />
+                    <marker date="1443993505000" expanded="true" signature="5164:5217" placeholder="SELECT name,..kids..." />
+                    <marker date="1443993505000" expanded="true" signature="5546:5589" placeholder="UPDATE kids ..." />
+                    <marker date="1443993505000" expanded="true" signature="5636:5687" placeholder="INSERT INTO ..." />
+                    <marker date="1443993505000" expanded="true" signature="9910:9995" placeholder="INSERT INTO ..." />
+                    <marker date="1443993505000" expanded="true" signature="11643:11734" placeholder="SELECT * FRO..intervals..." />
+                    <marker date="1443993505000" expanded="true" signature="11859:11973" placeholder="SELECT * FRO..intervals..." />
+                    <marker date="1443993505000" expanded="true" signature="12102:12214" placeholder="DELETE FROM ..." />
                   </folding>
                 </state>
               </provider>
@@ -100,10 +94,10 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="extend.html" pinned="false" current-in-tab="true">
+          <file leaf-file-name="extend.html" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/templates/extend.html">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.063192904">
+                <state vertical-scroll-proportion="-2.0357144">
                   <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
                   <folding />
                 </state>
@@ -125,6 +119,16 @@
               <provider selected="true" editor-type-id="text-editor">
                 <state vertical-scroll-proportion="-1.3571428">
                   <caret line="2" column="39" selection-start-line="2" selection-start-column="39" selection-end-line="2" selection-end-column="39" />
+                  <folding />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file leaf-file-name="schedule.html" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/templates/schedule.html">
+              <provider selected="true" editor-type-id="text-editor">
+                <state vertical-scroll-proportion="1.4534369">
+                  <caret line="77" column="33" selection-start-line="77" selection-start-column="33" selection-end-line="77" selection-end-column="33" />
                   <folding />
                 </state>
               </provider>
@@ -156,9 +160,9 @@
                 <state vertical-scroll-proportion="-10.925926">
                   <caret line="268" column="8" selection-start-line="268" selection-start-column="8" selection-end-line="268" selection-end-column="8" />
                   <folding>
-                    <marker date="1443987278000" expanded="true" signature="9389:9586" placeholder="..." />
-                    <marker date="1443987278000" expanded="true" signature="9647:9930" placeholder="..." />
-                    <marker date="1443987278000" expanded="true" signature="10551:10577" placeholder="..." />
+                    <marker date="1443993571000" expanded="true" signature="9389:9586" placeholder="..." />
+                    <marker date="1443993571000" expanded="true" signature="9867:10150" placeholder="..." />
+                    <marker date="1443993571000" expanded="true" signature="10771:10797" placeholder="..." />
                   </folding>
                 </state>
               </provider>
@@ -183,18 +187,18 @@
           <file leaf-file-name="__main__.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/__main__.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="-11.148149">
-                  <caret line="138" column="35" selection-start-line="138" selection-start-column="23" selection-end-line="138" selection-end-column="35" />
+                <state vertical-scroll-proportion="-14.777778">
+                  <caret line="279" column="48" selection-start-line="279" selection-start-column="48" selection-end-line="279" selection-end-column="48" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
-                    <marker date="1443985241000" expanded="true" signature="4970:5016" placeholder="SELECT name,..kids..." />
-                    <marker date="1443985241000" expanded="true" signature="5158:5211" placeholder="SELECT name,..kids..." />
-                    <marker date="1443985241000" expanded="true" signature="5540:5583" placeholder="UPDATE kids ..." />
-                    <marker date="1443985241000" expanded="true" signature="5630:5681" placeholder="INSERT INTO ..." />
-                    <marker date="1443985241000" expanded="true" signature="9697:9782" placeholder="INSERT INTO ..." />
-                    <marker date="1443985241000" expanded="true" signature="11430:11521" placeholder="SELECT * FRO..intervals..." />
-                    <marker date="1443985241000" expanded="true" signature="11646:11760" placeholder="SELECT * FRO..intervals..." />
-                    <marker date="1443985241000" expanded="true" signature="11889:12001" placeholder="DELETE FROM ..." />
+                    <marker date="1443993505000" expanded="true" signature="4976:5022" placeholder="SELECT name,..kids..." />
+                    <marker date="1443993505000" expanded="true" signature="5164:5217" placeholder="SELECT name,..kids..." />
+                    <marker date="1443993505000" expanded="true" signature="5546:5589" placeholder="UPDATE kids ..." />
+                    <marker date="1443993505000" expanded="true" signature="5636:5687" placeholder="INSERT INTO ..." />
+                    <marker date="1443993505000" expanded="true" signature="9910:9995" placeholder="INSERT INTO ..." />
+                    <marker date="1443993505000" expanded="true" signature="11643:11734" placeholder="SELECT * FRO..intervals..." />
+                    <marker date="1443993505000" expanded="true" signature="11859:11973" placeholder="SELECT * FRO..intervals..." />
+                    <marker date="1443993505000" expanded="true" signature="12102:12214" placeholder="DELETE FROM ..." />
                   </folding>
                 </state>
               </provider>
@@ -236,8 +240,8 @@
           <file leaf-file-name="server.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/orm/server.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state vertical-scroll-proportion="0.40215054">
-                  <caret line="277" column="34" selection-start-line="277" selection-start-column="34" selection-end-line="277" selection-end-column="34" />
+                <state vertical-scroll-proportion="0.9806452">
+                  <caret line="275" column="8" selection-start-line="275" selection-start-column="8" selection-end-line="275" selection-end-column="8" />
                   <folding>
                     <element signature="e#22#44#0" expanded="true" />
                   </folding>
@@ -302,7 +306,6 @@
         <option value="$PROJECT_DIR$/templates/tmp.html" />
         <option value="$PROJECT_DIR$/templates/login.html" />
         <option value="$PROJECT_DIR$/templates/login_direct.html" />
-        <option value="$PROJECT_DIR$/templates/schedule.html" />
         <option value="$PROJECT_DIR$/templates/overall_schedule.html" />
         <option value="$PROJECT_DIR$/templates/layout.html" />
         <option value="$PROJECT_DIR$/templates/users.html" />
@@ -311,10 +314,11 @@
         <option value="$PROJECT_DIR$/templates/debit.html" />
         <option value="$PROJECT_DIR$/templates/donate.html" />
         <option value="$PROJECT_DIR$/templates/history.html" />
-        <option value="$PROJECT_DIR$/__main__.py" />
-        <option value="$PROJECT_DIR$/orm/server.py" />
         <option value="$PROJECT_DIR$/templates/today.html" />
         <option value="$PROJECT_DIR$/templates/extend.html" />
+        <option value="$PROJECT_DIR$/__main__.py" />
+        <option value="$PROJECT_DIR$/orm/server.py" />
+        <option value="$PROJECT_DIR$/templates/schedule.html" />
       </list>
     </option>
   </component>
@@ -799,12 +803,6 @@
       <option name="number" value="Default" />
       <updated>1431014389137</updated>
     </task>
-    <task id="LOCAL-00002" summary="fixed login screen. Whole thing works according to tutorial now">
-      <created>1431225033980</created>
-      <option name="number" value="00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1431225033980</updated>
-    </task>
     <task id="LOCAL-00003" summary="starting to add in time element. splitting things up">
       <created>1431238246905</created>
       <option name="number" value="00003" />
@@ -1093,7 +1091,13 @@
       <option name="project" value="LOCAL" />
       <updated>1443982663560</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="server correctly updates live balance&#10;better display for today screen&#10;">
+      <created>1443987593623</created>
+      <option name="number" value="00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1443987593623</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1160,7 +1164,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="nav tweak" />
     <MESSAGE value="debits&#10;more bootstrap" />
     <MESSAGE value="bootstrapped schedule" />
     <MESSAGE value="added explicit shutdown" />
@@ -1185,14 +1188,15 @@
     <MESSAGE value="nicer formatting of intervals" />
     <MESSAGE value="pep8&#10;" />
     <MESSAGE value="more format cleanup in templates - use the same block structure for all&#10;working schedule page&#10;working shutddown" />
-    <option name="LAST_COMMIT_MESSAGE" value="more format cleanup in templates - use the same block structure for all&#10;working schedule page&#10;working shutddown" />
+    <MESSAGE value="server correctly updates live balance&#10;better display for today screen&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="server correctly updates live balance&#10;better display for today screen&#10;" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/__main__.py</url>
-          <line>181</line>
+          <line>182</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
@@ -1202,7 +1206,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/__main__.py</url>
-          <line>240</line>
+          <line>241</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -1212,7 +1216,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="jinja2-line">
           <url>file://$PROJECT_DIR$/templates/schedule.html</url>
-          <line>60</line>
+          <line>59</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
@@ -1480,14 +1484,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/schedule.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.071429">
-          <caret line="6" column="31" selection-start-line="6" selection-start-column="31" selection-end-line="6" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/users.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-10.857142">
@@ -1500,14 +1496,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-16.964285">
           <caret line="25" column="14" selection-start-line="25" selection-start-column="14" selection-end-line="25" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/orm/model.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
           <folding />
         </state>
       </provider>
@@ -1565,18 +1553,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/orm/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.925926">
-          <caret line="268" column="8" selection-start-line="268" selection-start-column="8" selection-end-line="268" selection-end-column="8" />
-          <folding>
-            <marker date="1443987278000" expanded="true" signature="9389:9586" placeholder="..." />
-            <marker date="1443987278000" expanded="true" signature="9647:9930" placeholder="..." />
-            <marker date="1443987278000" expanded="true" signature="10551:10577" placeholder="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/today.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-2.0357144">
@@ -1585,28 +1561,55 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/templates/extend.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-2.0357144">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/orm/model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/__main__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-3.4074075">
-          <caret line="117" column="10" selection-start-line="117" selection-start-column="4" selection-end-line="117" selection-end-column="10" />
+          <caret line="118" column="10" selection-start-line="118" selection-start-column="4" selection-end-line="118" selection-end-column="10" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <marker date="1443985241000" expanded="true" signature="4970:5016" placeholder="SELECT name,..kids..." />
-            <marker date="1443985241000" expanded="true" signature="5158:5211" placeholder="SELECT name,..kids..." />
-            <marker date="1443985241000" expanded="true" signature="5540:5583" placeholder="UPDATE kids ..." />
-            <marker date="1443985241000" expanded="true" signature="5630:5681" placeholder="INSERT INTO ..." />
-            <marker date="1443985241000" expanded="true" signature="9697:9782" placeholder="INSERT INTO ..." />
-            <marker date="1443985241000" expanded="true" signature="11430:11521" placeholder="SELECT * FRO..intervals..." />
-            <marker date="1443985241000" expanded="true" signature="11646:11760" placeholder="SELECT * FRO..intervals..." />
-            <marker date="1443985241000" expanded="true" signature="11889:12001" placeholder="DELETE FROM ..." />
+            <marker date="1443993505000" expanded="true" signature="4976:5022" placeholder="SELECT name,..kids..." />
+            <marker date="1443993505000" expanded="true" signature="5164:5217" placeholder="SELECT name,..kids..." />
+            <marker date="1443993505000" expanded="true" signature="5546:5589" placeholder="UPDATE kids ..." />
+            <marker date="1443993505000" expanded="true" signature="5636:5687" placeholder="INSERT INTO ..." />
+            <marker date="1443993505000" expanded="true" signature="9910:9995" placeholder="INSERT INTO ..." />
+            <marker date="1443993505000" expanded="true" signature="11643:11734" placeholder="SELECT * FRO..intervals..." />
+            <marker date="1443993505000" expanded="true" signature="11859:11973" placeholder="SELECT * FRO..intervals..." />
+            <marker date="1443993505000" expanded="true" signature="12102:12214" placeholder="DELETE FROM ..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/extend.html">
+    <entry file="file://$PROJECT_DIR$/orm/server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.063192904">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        <state vertical-scroll-proportion="-10.925926">
+          <caret line="268" column="8" selection-start-line="268" selection-start-column="8" selection-end-line="268" selection-end-column="8" />
+          <folding>
+            <marker date="1443993571000" expanded="true" signature="9389:9586" placeholder="..." />
+            <marker date="1443993571000" expanded="true" signature="9867:10150" placeholder="..." />
+            <marker date="1443993571000" expanded="true" signature="10771:10797" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/schedule.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.4534369">
+          <caret line="77" column="33" selection-start-line="77" selection-start-column="33" selection-end-line="77" selection-end-column="33" />
           <folding />
         </state>
       </provider>

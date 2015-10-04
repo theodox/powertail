@@ -272,6 +272,13 @@ class PowerServer(object):
         return tuple(intervals)
 
     @PEEWEE.atomic()
+    def user_replenish(self, user_name):
+        u = User.select().where(User.name == user_name).get()
+        updates = Replenish.select().where(Replenish.user == u)
+        return tuple(updates)
+
+
+    @PEEWEE.atomic()
     def day_schedule(self, daynumber):
         active_intervals = Interval.select().where((Interval.day == daynumber)).order_by(Interval.user, Interval.start)
         result = OrderedDict((i.user, []) for i in active_intervals)
