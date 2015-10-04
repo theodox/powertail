@@ -15,11 +15,11 @@
                     {% for eachentry in entries[user] %}
                         <tr>
                             <td>{{ eachentry.start.strftime("%I:%M %p") |safe }}</td>
-                            <td>{{eachentry.end.strftime("%I:%M %p") | safe }}</td>
+                            <td>{{ eachentry.end.strftime("%I:%M %p") | safe }}</td>
                         </tr>
                     {% endfor %}
                 </table>
             </div>
         </div>
     {% endfor %}
-{% endblock %}
+{% endblock %}s
