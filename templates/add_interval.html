@@ -1,25 +1,75 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h2>Add access time for {{ username}} on {{ dayname }}</h2>
-    <form method="post" action="add">
-        <dl>
-            <dt>create</dt>
-            <dd>
-                Start
-                <input type="time" name=start_time>
-                End
-                <input type="time" name=end_time>
-            </dd>
-        </dl>
-        <dl>
-            <dt>System password:
-            <dd><input type="hidden" name="dayname" value={{dayname }}> </dd>
-            <dd><input type="hidden" name="daynum" value={{ daynum }}></dd>
-            <dd><input type="hidden" name="username" value={{ username }}></dd>
+    <div class="container">
+        <h3>Add time block for {{ username }} on {{ dayname }}</h3>
 
-            <dd><input type=password name=password>
-            <input type=submit value=Add></dd>
-        </dl>
-    </form>
+        <form method="post" action="add" id="mainform">
+            <div class="form-horizontal">
+                <!-- start / end -->
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="start_time">
+                        Start time
+                    </label>
 
+                    <div class="col-xs-4">
+                        <input type="time" class="form-control" name=start_time required="true"
+                               value="{{ start_time }}">
+                    </div>
+                </div>
+                <div class="form-group {% if error=="too_early" %}has-error{% endif %} ">
+                    <label class="control-label col-xs-2" for="end_time">
+                        End time
+                    </label>
+
+                    <div class="col-xs-4">
+                        <input type="time" class="form-control" name=end_time required="true" value="{{ end_time }}">
+                    </div>
+                </div>
+                <!-- end start/end -->
+                <!-- exp date -->
+                <div class="form-group">
+
+                    <label class="control-label col-xs-2" for="is_temp">Temporary?</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                          <span class="input-group-addon">
+                            <input type="checkbox"
+                                   name="is_temp"
+                                   value="is_temp"
+                                    {% if is_temp == True %} checked {% endif %}>
+
+                          </span>
+                            <input type="date"
+                                   name="expires"
+                                   class="form-control"
+                                   value="{{ expires }}">
+
+                        </div>
+                    </div>
+                </div>
+                <!--- end date -->
+                <!--- password -->
+                <div class="form-group {% if error=="password" %}has-error{% endif %}">
+                    <label class="control-label col-xs-2" for="password">System Password</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" required="true">
+                            <span class="input-group-btn">
+                                 <input class="btn btn-default" type="submit" value=Submit>
+                                     Enter
+                                </input>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!--- password -->
+                <input type="hidden" name="dayname" value={{ dayname }}>
+                <input type="hidden" name="daynum" value={{ daynum }}>
+                <input type="hidden" name="username" value={{ username }}>
+
+            </div>
+        </form>
+    </div>
 {% endblock %}

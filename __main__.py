@@ -18,6 +18,12 @@ from orm.server import PowerServer
 
 
 
+
+
+
+
+
+
 # configuration
 
 DEBUG = True
@@ -277,7 +283,7 @@ def get_schedule(username):
                            entries=entries,
                            username=username,
                            balance=user.balance,
-                           replenish = replenish)
+                           replenish=replenish)
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])
@@ -287,24 +293,49 @@ def create_interval(username):
     if request.method == 'GET':
         dayname = request.args.get('dayname')
         daynum = request.args.get('daynum')
-        return render_template('add_interval.html', username=username, dayname=dayname, daynum=daynum)
+        return render_template('add_interval.html',
+                               username=username,
+                               dayname=dayname,
+                               daynum=daynum,
+                               start_time="15:00",
+                               end_time="18:00",
+                               expires=datetime.date.today() + datetime.timedelta(days=1),
+                               is_temp=False
+                               )
     else:
         username = request.form['username']
         daynum = request.form['daynum']
-        if not check_sys_password(request):
-            error = "Incorrect password"
-            return render_template('add_interval.html', username=username,
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        expires = request.form['expires']
+        is_temp = request.form.get('is_temp') is not None
+
+        if not check_sys_password(request)[0]:
+            error = "password"
+            return render_template('add_interval.html',
+                                   username=username,
                                    error=error, dayname=request.form['dayname'],
-                                   daynum=daynum)
+                                   daynum=daynum,
+                                   start_time=start_time,
+                                   end_time=end_time,
+                                   expires=expires,
+                                   is_temp=is_temp)
+
         start_hr, start_min = request.form['start_time'].split(":")
         end_hr, end_min = request.form['end_time'].split(":")
         start_num = int(start_hr) + int(start_min) / 60.0
         end_num = int(end_hr) + int(end_min) / 60.0
         if start_num >= end_num:
-            error = "End time must be later than start time"
-            return render_template('add_interval.html', username=username,
+            error = "too_early"
+            return render_template('add_interval.html',
+                                   username=username,
                                    error=error, dayname=request.form['dayname'],
-                                   daynum=daynum)
+                                   daynum=daynum,
+                                   start_time=start_time,
+                                   end_time=end_time,
+                                   expires=expires,
+                                   is_temp=is_temp)
+
         with connect_db() as db:
             cursor = db.cursor()
             cursor.execute("INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES (?, ?, ?, ?)",
