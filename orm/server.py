@@ -277,7 +277,6 @@ class PowerServer(object):
         updates = Replenish.select().where(Replenish.user == u)
         return tuple(updates)
 
-
     @PEEWEE.atomic()
     def day_schedule(self, daynumber):
         active_intervals = Interval.select().where((Interval.day == daynumber)).order_by(Interval.user, Interval.start)
@@ -291,10 +290,11 @@ class PowerServer(object):
         self._status = PowerCheck(*self.check())
 
     @PEEWEE.atomic()
-    def add_interval(self, user_name, day, start, end):
-        u = User.select().where((User.name) == user_name).get()
-        i = Interval.create(User=u, start=start, end=end, day=day)
+    def add_interval(self, user_name, day, start, end, expires=None):
+        u = User.select().where(User.name == user_name).get()
+        i = Interval.create(user=u, start=start, end=end, day=day, expires=expires)
         i.save()
+        self.refresh()
         self.log("Added new interval for {0}: day {1}, start {2}, end {3}".format(user_name, day, start, end))
 
     @PEEWEE.atomic()

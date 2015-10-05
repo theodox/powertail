@@ -24,6 +24,13 @@ from orm.server import PowerServer
 
 
 
+
+
+
+
+
+
+
 # configuration
 
 DEBUG = True
@@ -68,6 +75,10 @@ server.start()
 def check_sys_password(request):
     pwd = request.form['password']
     return server.validate_user('system', pwd)
+
+
+def interpret_html_time(time_str):
+    return datetime.datetime.strptime(time_str, "%H:%M").time()
 
 
 @app.before_request
@@ -321,11 +332,10 @@ def create_interval(username):
                                    expires=expires,
                                    is_temp=is_temp)
 
-        start_hr, start_min = request.form['start_time'].split(":")
-        end_hr, end_min = request.form['end_time'].split(":")
-        start_num = int(start_hr) + int(start_min) / 60.0
-        end_num = int(end_hr) + int(end_min) / 60.0
-        if start_num >= end_num:
+        start_time_obj = interpret_html_time(start_time)
+        end_time_obj = interpret_html_time(end_time)
+
+        if end_time_obj <= start_time_obj:
             error = "too_early"
             return render_template('add_interval.html',
                                    username=username,
@@ -336,13 +346,19 @@ def create_interval(username):
                                    expires=expires,
                                    is_temp=is_temp)
 
-        with connect_db() as db:
-            cursor = db.cursor()
-            cursor.execute("INSERT INTO intervals ('day', 'turn_on', 'turn_off', 'kids_name') VALUES (?, ?, ?, ?)",
-                           (daynum, start_num, end_num, username))
+        exp = None
+        if is_temp:
+            exp = datetime.datetime.strptime(expires, "%Y-%m-%d").date()
 
-            flash('added interval')
-            return redirect(url_for('get_schedule', username=username))
+        server.add_interval(username,
+                            daynum,
+                            start_time_obj,
+                            end_time_obj,
+                            expires=exp
+                            )
+
+        flash('added interval')
+        return redirect(url_for('get_schedule', username=username))
 
 
 @app.route('/remove_interval/<username>', methods=['GET', 'POST'])
