@@ -5,9 +5,14 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from db import connect_db, init_db, display_time
+from db import connect_db, init_db
 from orm.model import User, PEEWEE, setup, Interval, Replenish
 from orm.server import PowerServer
+
+
+
+
+
 
 
 
@@ -79,6 +84,11 @@ def check_sys_password(request):
 
 def interpret_html_time(time_str):
     return datetime.datetime.strptime(time_str, "%H:%M").time()
+
+day_names = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday"
+DAY_NUMS = OrderedDict()
+for num, day in enumerate(day_names.split()):
+    DAY_NUMS[day]= num
 
 
 @app.before_request
@@ -289,12 +299,15 @@ def get_schedule(username):
     replenish = server.user_replenish(username)
     user = User.select().where((User.name == username)).get()
 
+
     return render_template('schedule.html',
                            cap=user.cap,
                            entries=entries,
                            username=username,
                            balance=user.balance,
-                           replenish=replenish)
+                           replenish=replenish,
+                           daynumbers=DAY_NUMS
+                           )
 
 
 @app.route('/create_interval/<username>', methods=['GET', 'POST'])
@@ -361,47 +374,11 @@ def create_interval(username):
         return redirect(url_for('get_schedule', username=username))
 
 
-@app.route('/remove_interval/<username>', methods=['GET', 'POST'])
-def delete_interval(username):
-    error = None
-    if request.method == 'GET':
-        dayname = request.args.get('dayname')
-        daynum = request.args.get('daynum')
-        start_num = float(request.args.get('start_num'))
-        end_num = float(request.args.get('end_num'))
-        start_time = display_time(start_num)
-        end_time = display_time(end_num)
-        return render_template('delete_interval.html', username=username, start_time=start_time, start_num=start_num,
-                               end_time=end_time, end_num=end_num, dayname=dayname, daynum=daynum, error=None)
-    else:
-        username = request.form.get('username')
-        dayname = request.form.get('dayname')
-        daynum = request.form.get('daynum')
-        start_num = float(request.form.get('start_num'))
-        end_num = float(request.form.get('end_num'))
-        start_time = display_time(start_num)
-        end_time = display_time(end_num)
-
-        if not check_sys_password(request):
-            return render_template('delete_interval.html', username=username, start_time=start_time,
-                                   start_num=start_num,
-                                   end_time=end_time, end_num=end_num, dayname=dayname, daynum=daynum,
-                                   error="Incorrect password")
-        with connect_db() as conn:
-            real_day_num = int(daynum)
-            print "SELECT * FROM intervals WHERE (kids_name like %s AND day=%s AND turn_on=%s AND turn_off=%s)" % (
-                username, real_day_num, start_num, end_num)
-
-            print conn.cursor().execute(
-                "SELECT * FROM intervals WHERE (kids_name like ? AND day=? AND ABS (turn_on - ?) < .05  AND ABS (turn_off-?) < .05)",
-                (username, real_day_num, start_num, end_num)).fetchall()
-
-            conn.cursor().execute(
-                "DELETE FROM intervals WHERE (kids_name like ? AND day=? AND ABS (turn_on - ?) < .05  AND ABS (turn_off-?) < .05)",
-                (username, real_day_num, start_num, end_num))
-
-        flash('removed interval for %s' % username)
-        return redirect(url_for('get_schedule', username=username))
+@app.route('/remove_interval/<interval>', methods=['GET', 'POST'])
+def delete_interval(interval):
+    Interval.delete().where(Interval.id == interval).execute()
+    user = request.args.get('username')
+    return redirect(url_for('get_schedule', username=user))
 
 
 def format_remaining_time(remaining):

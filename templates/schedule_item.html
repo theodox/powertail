@@ -1,12 +1,18 @@
-{% macro sched(username, start, end, start_num, end_num,  daynum, dayname) -%}
+{% macro sched(interval, username) -%}
     <div class="container list-group-item">
         <div class="row">
-            <div class="col-sm-1" >
-                <a class="btn" href="{{ url_for('delete_interval', username=username, daynum=daynum, dayname = dayname, start_num = start_num, end_num = end_num) }}">
+            <div class="col-sm-1">
+                <a class="btn" href="{{ url_for('delete_interval', username=username, interval=interval.id ) }}">
                     <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
                 </a>
             </div>
-            <div class="col-sm-3" style="margin-top: 4px">{{ start|safe }} to {{ end|safe }}</div>
+            <div class="col-sm-4">
+                {{ interval.start.strftime("%I:%m %p") |safe }} to
+                {{ interval.end.strftime("%I:%m %p") |safe }}
+                {% if interval.expires %}
+                    (expires on {{ interval.expires.strftime("%m/%d") }})
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -16,8 +22,9 @@
     <div class="container list-group-item bg-info">
         <div class="row">
             <div class="col-sm-1">
-                <a class="btn" href="{{ url_for('create_interval', username=username, daynum=daynum, dayname=dayname) }}">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true" ></span> add...
+                <a class="btn"
+                   href="{{ url_for('create_interval', username=username, daynum=daynum, dayname=dayname) }}">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> add...
                 </a>
             </div>
         </div>
