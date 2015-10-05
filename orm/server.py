@@ -3,7 +3,7 @@ from time import sleep
 from datetime import timedelta
 from collections import namedtuple, OrderedDict
 import threading
-
+from power import PowerTail
 from orm.model import *
 
 PowerCheck = namedtuple('powercheck', 'on message balance time_left off_time')
@@ -24,12 +24,14 @@ class PowerServer(object):
     def __init__(self, peewee_db, interval=12.0):
         self.interval = interval
         self.database = peewee_db
+        self._power = PowerTail()
         self._alive = False
         self._system = User.select().where(User.name % "system" and User.is_admin == True).get()
         self._user = None
         self._last_check = None
         self._status = PowerCheck(0, 'starting', -1, timedelta(), datetime.now())
         self._lock = threading.Lock()
+
 
     @property
     def status(self):
@@ -318,6 +320,11 @@ class PowerServer(object):
         """
         while self._alive:
             self._status = PowerCheck(*self.check())
+            if self._status.on > 0:
+                self._power.on()
+            else:
+                self._power.off()
+
             LOGGING.info(self._status)
             sleep(self.interval)
         self.log("server shutdown")

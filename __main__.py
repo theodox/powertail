@@ -5,32 +5,8 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from db import connect_db, init_db
 from orm.model import User, PEEWEE, setup, Interval, Replenish
 from orm.server import PowerServer
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -47,7 +23,6 @@ from datetime import timedelta
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.permanent_session_lifetime = timedelta(hours=5)
-from  power import PowerManager
 
 manager = None
 
@@ -85,10 +60,11 @@ def check_sys_password(request):
 def interpret_html_time(time_str):
     return datetime.datetime.strptime(time_str, "%H:%M").time()
 
+
 day_names = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday"
 DAY_NUMS = OrderedDict()
 for num, day in enumerate(day_names.split()):
-    DAY_NUMS[day]= num
+    DAY_NUMS[day] = num
 
 
 @app.before_request
@@ -181,7 +157,6 @@ def direct(username=None):
             server.set_user(name)
             session['logged_in'] = True
             session['username'] = name
-            manager.set_user(name)
             flash('%s logged in' % name)
             server.refresh()
 
@@ -196,34 +171,24 @@ def direct(username=None):
 def change_pwd(username):
     error = None
     if request.method == 'POST':
-        name = username
         pwd = request.form.get('old_password', 'no old password')
         new_1 = request.form.get('new_password_1', 'no new pwd1')
         new_2 = request.form.get('new_password_2', 'no new pwd2')
 
         if new_1 != new_2:
-            error = "New passwords do not match"
-            return render_template('change_password.html', error=error, username=name)
+            error = "mismatched"
+            return render_template('change_password.html', error=error, username=username)
 
-        with connect_db() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT name, password FROM kids WHERE name = ?", (name,))
-            msg = username
-            results = cur.fetchall()
-            if results[0][1] != pwd:
-                cur.execute("SELECT name, password FROM kids WHERE name = 'System'", tuple())
-                results = cur.fetchall()
-                if results[0][1] != pwd:
-                    error = "Invalid password"
-                    return render_template('change_password.html', error=error, username=username)
-                else:
-                    msg = 'System user '
+        user = User.select().where(User.name == username).get()
 
-            cur.execute('UPDATE kids set password = ? WHERE name = ?', (new_1, username))
-            cur.execute("INSERT INTO history (kids_name, event) VALUES (?,?)",
-                        (msg, 'password changed for %s' % username))
-            flash('password changed for %s' % username)
-            return redirect(url_for('get_schedule', username=username))
+        if pwd != user.password:
+            error = "incorrect"
+            return render_template('change_password.html', error=error, username=username)
+
+        user.password = new_1
+        user.save()
+        flash('password changed for %s' % username)
+        return redirect(url_for('get_schedule', username=username))
 
     return render_template('change_password.html', error=error, username=username)
 
@@ -298,7 +263,6 @@ def get_schedule(username):
     entries = server.user_schedule(username)
     replenish = server.user_replenish(username)
     user = User.select().where((User.name == username)).get()
-
 
     return render_template('schedule.html',
                            cap=user.cap,
@@ -381,14 +345,6 @@ def delete_interval(interval):
     return redirect(url_for('get_schedule', username=user))
 
 
-def format_remaining_time(remaining):
-    if remaining > 60:
-        display = "{} hours {} minutes".format(int(remaining / 60.0), remaining % 60)
-    else:
-        display = "{} minutes".format(remaining)
-    return display
-
-
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
@@ -402,11 +358,11 @@ def logout():
 
 if __name__ == '__main__':
     if sys.argv[-1] == '--setup':
-        init_db(app)
+        setup()
+        admin = User.create(name="system", password="admin", is_admin=True)
+        admin.save()
+        print "database created"
         raise SystemExit(0)
     else:
         print "starting"
-
-        manager = PowerManager.manager(app)
-        manager.monitor()
         app.run(host=('0.0.0.0'), port=5000, use_reloader=False)
