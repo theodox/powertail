@@ -265,7 +265,12 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def users(self):
-        return tuple((i for i in User.select()))
+        user_data = tuple( User.select().order_by(User.name))
+        results = OrderedDict()
+        for u in user_data:
+            results[u] = self.user_replenish(u.name)
+        return results
+
 
     @PEEWEE.atomic()
     def user_schedule(self, user_name):
@@ -277,7 +282,7 @@ class PowerServer(object):
     def user_replenish(self, user_name):
         u = User.select().where(User.name == user_name).get()
         updates = Replenish.select().where(Replenish.user == u)
-        return tuple(updates)
+        return tuple(i for i in updates)
 
     @PEEWEE.atomic()
     def day_schedule(self, daynumber):

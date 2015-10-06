@@ -8,9 +8,9 @@
                 </h3>
                 {% if user.balance > 0 %}
                     {{ user.balance }} minutes available
-            {% else %}
-                No time available
-            {% endif %}
+                {% else %}
+                    No time available
+                {% endif %}
                 <table class="table table-responsive table-bordered table-striped">
                     <tr>
                         <th>start</th>

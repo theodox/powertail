@@ -61,7 +61,7 @@ def interpret_html_time(time_str):
     return datetime.datetime.strptime(time_str, "%H:%M").time()
 
 
-day_names = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday"
+day_names = "Monday Tuesday Wednesday Thursday Friday Saturday Sunday "
 DAY_NUMS = OrderedDict()
 for num, day in enumerate(day_names.split()):
     DAY_NUMS[day] = num
@@ -115,7 +115,7 @@ def show_history():
 @app.route('/users')
 def users():
     entries = server.users()
-    return render_template('users.html', kids=entries)
+    return render_template('users.html', users=entries)
 
 
 @app.route('/extend', methods=['GET', 'POST'])
@@ -221,15 +221,14 @@ def donate(username=None):
 def debit(username=None):
     error = None
     if request.method == 'GET':
-        return render_template('debit.html', error=error, children=(username,))
+        return render_template('debit.html', error=error, user=username)
 
     elif request.method == 'POST':
         if not check_sys_password(request):
             error = "Incorrect password"
             return render_template('debit.html',
                                    error=error,
-                                   children=(request.form['child'],),
-                                   username=request.form['child'])
+                                   user=username)
 
         deduction = int(request.form['amount'])
         user = request.form['child']

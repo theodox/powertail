@@ -6,16 +6,19 @@
                 <th>user</th>
                 <th>balance</th>
                 <th>max</th>
-                <th>updated</th>
+                <th>next update</th>
                 <th>admin</th>
             </tr>
-            {% for kid in kids %}
+            {% for user, repl in users.items() %}
                 <tr>
-                    <td><a href="{{ url_for('get_schedule', username=kid.name) }}">{{ kid.name }}</a></td>
-                    <td>{{ kid.balance|safe }}</td>
-                    <td>{{ kid.cap | safe}}</td>
-                    <td>{{ kid.updates | safe }}</td>
-                    <td>{{ kid.is_admin  | safe }}</td>
+                    <td><a href="{{ url_for('get_schedule', username=user.name) }}">{{ user.name }}</a></td>
+                    <td>{{ user.balance|safe }}</td>
+                    <td>{{ user.cap | safe}}</td>
+                    <td>{% for r in repl %}
+                        <p>{{ r.upcoming.strftime('%A') }}: {{ r.amount }} (every {{ r.rollover }} day{% if r.rollover > 1 %}s{% endif %})</p>
+                        {% endfor %}
+                    </td>
+                    <td>{{ user.is_admin  | safe }}</td>
                 </tr>
             {% endfor %}
         </table>

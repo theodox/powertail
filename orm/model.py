@@ -23,6 +23,9 @@ class User(PowertailMeta):
     last_login = DateTimeField(default=datetime.now)
     picture = CharField(default="porp")
 
+    def __hash__(self):
+        return hash(self.name)
+
 
 class Replenish(PowertailMeta):
     user = ForeignKeyField(User, related_name='updates', on_delete=CASCADE)
