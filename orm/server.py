@@ -30,7 +30,7 @@ class PowerServer(object):
         self._user = None
         self._last_check = None
         self._status = PowerCheck(0, 'starting', -1, timedelta(), datetime.now())
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
 
 
     @property
@@ -85,6 +85,9 @@ class PowerServer(object):
         """
         check the database for the to see if the status is on and if so, how much time is left
         """
+        # replenish if needed
+        self.replenish()
+
 
         # delete any expired temporary lockouts or intervals
         self.clear_old_lockouts()

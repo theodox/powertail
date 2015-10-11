@@ -27,26 +27,6 @@ app.permanent_session_lifetime = timedelta(hours=5)
 manager = None
 
 # TEST CODE
-setup()
-sysad = User.create(name='system', password='system', is_admin=True)
-sysad.save()
-helen = User.create(name='helen', password='test', picture='flower')
-helen.save()
-
-al = User.create(name='al', password='test', picture='stud')
-al.save()
-al_r = Replenish.create(user=al, amount=10, upcoming=datetime.datetime.now() + timedelta(minutes=10))
-al_r.save()
-for r in range(7):
-    dummy = Interval.create(user=al, day=r, start=datetime.time(01, 01), end=datetime.time(20, 0))
-    dummy.save()
-tmp = Interval.create(user=al,
-                      day=0,
-                      start=datetime.time(10, 0),
-                      end=datetime.time(11, 30),
-                      expires=datetime.datetime.now() + datetime.timedelta(hours=24)
-                      )
-tmp.save()
 
 server = PowerServer(PEEWEE, 10)
 server.start()
@@ -358,9 +338,6 @@ def logout():
 if __name__ == '__main__':
     if sys.argv[-1] == '--setup':
         setup()
-        admin = User.create(name="system", password="admin", is_admin=True)
-        admin.save()
-        print "database created"
         raise SystemExit(0)
     else:
         print "starting"

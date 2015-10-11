@@ -1,13 +1,17 @@
 from datetime import datetime, time
+
 from peewee import Model, CharField, FloatField, DateTimeField, BooleanField, ForeignKeyField, IntegerField, Check, \
     TimeField, TextField, SqliteDatabase
+
 __author__ = 'stevet'
 
 CASCADE = 'cascade'
 PEEWEE = SqliteDatabase('powertail_2.db')
 
 import logging
+
 LOGGING = logging.getLogger('powertail')
+
 
 class PowertailMeta(Model):
     class Meta:
@@ -30,7 +34,7 @@ class User(PowertailMeta):
 class Replenish(PowertailMeta):
     user = ForeignKeyField(User, related_name='updates', on_delete=CASCADE)
     upcoming = DateTimeField(null=False)  # time of next refill
-    rollover = IntegerField(default=7)    # time in days between refills
+    rollover = IntegerField(default=7)  # time in days between refills
     amount = FloatField()
 
 
@@ -75,3 +79,37 @@ def setup():
         except:
             pass
         PEEWEE.create_table(t)
+
+    sysad = User.create(name='system', password='1ipschitz', is_admin=True)
+    sysad.save()
+
+    helen = User.create(name='helen', password='helent2', picture='flower')
+    helen.save()
+
+    al = User.create(name='al', password='alt2', cap=120, picture='stud')
+    al.save()
+
+    nicky = User.create(name='nicky', password='nickyt2', picture='swimmer')
+    nicky.save()
+
+    daddy = User.create(name='daddy', password='mommy', cap=180, picture='goggles', isadmin=True)
+    daddy.save()
+
+    for r in range(7):
+
+        for u in (helen, daddy, al, nicky):
+            new_interval = Interval.create(user=u, day=r, start=time(9, 0), end=time(20, 0))
+            new_interval.save()
+
+    backdate = datetime.now()
+    backdate = backdate.replace(hour=0, minute=1)
+
+    for u in (helen, nicky):
+        repl = Replenish.create(user=u, upcoming=backdate, amount=30, rollover=1)
+        repl.save()
+
+    for u in (al, daddy):
+        repl = Replenish.create(user=u, upcoming=backdate, amount=60, rollover=1)
+        repl.save()
+
+    print "setup completed"
