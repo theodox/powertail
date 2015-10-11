@@ -22,8 +22,10 @@ try:
 except ImportError:
     gpio = gpio_proxy()
 
+# --- initializer ------
 gpio.setmode(gpio.BOARD)
 gpio.setup(12, gpio.OUT)
+# ----------------------
 
 
 class PowerTail(object):
