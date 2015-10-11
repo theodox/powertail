@@ -95,11 +95,15 @@ def setup():
     daddy = User.create(name='daddy', password='mommy', cap=180, picture='goggles', isadmin=True)
     daddy.save()
 
+    print "users created"
+
     for r in range(7):
 
         for u in (helen, daddy, al, nicky):
             new_interval = Interval.create(user=u, day=r, start=time(9, 0), end=time(20, 0))
             new_interval.save()
+
+    print "intervals created"
 
     backdate = datetime.now()
     backdate = backdate.replace(hour=0, minute=1)
