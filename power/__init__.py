@@ -5,12 +5,16 @@ from threading import Lock
 
 class gpio_proxy(object):
     OUT = 1
+    BOARD = 'board'
 
     def setup(self, pin, val):
         print 'pretending to set pin %i to %s' % (pin, val)
 
     def output(self, pin, val):
         print 'pretending to set pin %i to %s' % (pin, val)
+
+    def setmode(self, mode):
+        print 'pretending to set mode to "%s"' % mode
 
 
 try:
