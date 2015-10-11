@@ -18,6 +18,7 @@ try:
 except ImportError:
     gpio = gpio_proxy()
 
+gpio.setmode(gpio.BOARD)
 gpio.setup(12, gpio.OUT)
 
 
