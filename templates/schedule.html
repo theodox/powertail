@@ -27,13 +27,19 @@
         <table class="table table-striped">
             {% for repl in replenish %}
                 <tr>
-                    <p>
+                    <td>
+                        <a class="btn" href="{{ url_for('rem_repl', repl=repl.id) }}">
+                    <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
+                </a>
+                    </td>
+                    <td>
                         On {{ daynames[repl.upcoming.weekday()] }}
-                        add {{ repl.amount }} minutes</p>
+                        add {{ repl.amount }} minutes
+                    </td>
 
-                    <p>
+                    <td>
                         (update every {{ repl.rollover }} day{% if repl.rollover >1 %}s{% endif %})
-                    </p>
+                    </td>
                 </tr>
             {% endfor %}
         </table>

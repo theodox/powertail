@@ -1,78 +1,31 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-        <h3>Update {{ username }}'s credits</h3>
+        <h3>Remove update from {{ repl.user.name }} on {{ daynames[repl.upcoming.weekday()] }}</h3>
 
         <form method="post" action="add" id="mainform">
             <div class="form-horizontal">
                 <!-- update_day -->
+
                 <div class="form-group">
-                    <label class="control-label col-xs-2" for="update_amount">Add</label>
-
-                    <div class="col-xs-4">
-                        <div class="input-group">
-                            <select name="amount" class="input-lg">
-                                <option value="5">5 minutes</option>
-                                <option value="15">15 minutes</option>
-                                <option value="30">30 minutes</option>
-                                <option value="60">1 hour</option>
-                                <option value="120">2 hour</option>
-                            </select>
-                            </div>
-                        </div>
-
-                    </div>
-                    <!--- update_day -->
-                    <!-- update_day -->
-                    <div class="form-group">
-                        <label class="control-label col-xs-2" for="update_day">Day</label>
-
-                        <div class="col-xs-4">
-                            <div class="input-group">
-                                <select class="input-lg" name="update_day">
-                                    <option value="0">Monday</option>
-                                    <option value="1">Tuesday</option>
-                                    <option value="2">Wednesday</option>
-                                    <option value="3">Thursday</option>
-                                    <option value="4">Friday</option>
-                                    <option value="5">Saturday</option>
-                                    <option value="6">Sunday</option>
-                                </select>
-                            </div>
-                        </div>
-
-                    </div>
-                    <!--- update_day -->
-                    <div class="form-group">
-                        <label class="control-label col-xs-2" for="update_frequency">Frequency</label>
-
-                        <div class="col-xs-4">
-                            <div class="input-group">
-                                <select class="input-lg" name="update_frequency">
-                                    <option value="1">daily</option>
-                                    <option value="2">every other day</option>
-                                    <option value="7">weekly</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <!--- end freq -->
                     <!--- password -->
                     <div class="form-group {% if error=="password" %}has-error{% endif %}">
-                        <label class="control-label col-xs-2" for="password">System Password</label>
+                        <label class="control-label col-xs-2" for="password">Enter password to delete</label>
 
                         <div class="col-xs-4">
                             <div class="input-group">
                                 <input type="password" class="form-control" name="password" required="true">
                             <span class="input-group-btn">
                                  <input class="btn btn-default" type="submit" value=Submit>
-                                     Enter
+                                     Delete
                                 </input>
                             </span>
                             </div>
                         </div>
                     </div>
                     <!--- password -->
+                    <input type="hidden" name="dayname" value={{ dayname }}>
+                    <input type="hidden" name="daynum" value={{ daynum }}>
                     <input type="hidden" name="username" value={{ username }}>
 
                 </div>
