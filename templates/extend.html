@@ -1,26 +1,43 @@
 {% extends "layout.html" %}
 {% block body %}
-    <h3>Free Time</h3>
+    <div class="container">
+        <h3>Free Time</h3>
 
-    <form method="post" action="extend">
-        <dl>
-            <dd>
-                Turn TV on with no user for
+        <form method="post" action="extend">
+            <div class="form-horizontal">
+                <!-- amt -->
+                <div class="form-group">
+                    <label class="control-label col-xs-2" for="amount">Turn TV on for</label>
 
-                <select name="amount">
-                    <option value="10">10 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="120">2 hours</option>
-                    <option value="120">4 hours</option>
-                </select>
-            </dd>
-        </dl>
-        <dl>
-            <dt>System password:
-            <dd><input type=password name=password>
-            <dd><input type=submit value=Login>
-        </dl>
-    </form>
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <select class="input-lg" name="amount">
+                                <option value="10">10 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                                <option value="120">4 hours</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group {% if error=="password" %}has-error{% endif %}">
+                    <label class="control-label col-xs-2" for="password">System Password</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" required="true">
+                            <span class="input-group-btn">
+                                 <input class="btn btn-default" type="submit" value=Submit>
+                                     Enter
+                                </input>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
     {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
 {% endblock %}

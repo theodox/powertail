@@ -1,41 +1,38 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
+        <h3>Deduct Time From {{ user }}</h3>
+
         <form method="post" action="donate">
-            <div class="form-inline">
+            <div class="form-horizontal">
+                <!-- amt -->
                 <div class="form-group">
-                    <label class="control-label" for="amounts">Deduct</label>
-                    <select class="form-control" name="amount">
-                        <option value="5">5 minutes</option>
-                        <option value="15">15 minutes</option>
-                        <option value="30">30 minutes</option>
-                        <option value="60">1 hour</option>
-                        <option value="120">2 hour</option>
-                    </select>
-                    <label class="control-label">from {{ user }}</label>
-                    <input name="user" value="{{ user }}" type="hidden">
-                </div>
-            </div>
-            <div class="row">
-                <div class="form-group {% if error == "incorrect" %} has-error{% endif %}">
-                    <label class="control-label col-xs-2" for="password">
-                        {% if error == "incorrect" %}
-                            <span>incorrect password</span>
-                        {% else %}
-                            <span>current password</span>
-                        {% endif %}
-                    </label>
+                    <label class="control-label col-xs-2" for="amounts">Deduct</label>
 
                     <div class="col-xs-4">
-
                         <div class="input-group">
-                            <input class="form-control"
-                                   type=password
-                                   name=password
-                                   required="true">
-                        <span class="input-group-addon">
-                             <input type=submit value="deduct">
-                        </span>
+                            <select class="form-control input-lg" name="amount">
+                                <option value="5">5 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hour</option>
+                            </select>
+                        </div>
+                        <input name="user" value="{{ user }}" type="hidden"></div>
+                </div>
+
+                <div class="form-group {% if error=="password" %}has-error{% endif %}">
+                    <label class="control-label col-xs-2" for="password">System Password</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <input type="password" class="form-control" name="password" required="true">
+                            <span class="input-group-btn">
+                                 <input class="btn btn-default" type="submit" value=Deduct>
+                                     Deduct
+                                </input>
+                            </span>
                         </div>
                     </div>
                 </div>
