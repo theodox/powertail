@@ -232,7 +232,8 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def replenish(self):
-        to_be_replenished = Replenish.select().where(Replenish.upcoming < datetime.now()).join(User)
+        tonight = (datetime.now() + timedelta(days=1)).replace(hour=0, minute=0)
+        to_be_replenished = Replenish.select().where(Replenish.upcoming < tonight).join(User)
 
         for r in to_be_replenished:
             # if there are bonus minutes, don't drop to cap
@@ -265,7 +266,7 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def history(self, limit=100):
-        return History.select().limit(limit)
+        return History.select().limit(limit).order_by(History.time.desc())
 
     @PEEWEE.atomic()
     def users(self):

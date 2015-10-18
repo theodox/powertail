@@ -63,7 +63,7 @@ for num, day in enumerate(day_names.split()):
 @app.before_request
 def before_request():
     PEEWEE.connect()
-    _user_query = User.select().order_by(User.name)
+    _user_query = User.select().where(User.name != 'system').order_by(User.name)
     _user_pics = [(u.name, u.picture) for u in _user_query]
     g.logins = OrderedDict(_user_pics)
     g.server_status = server.status
@@ -392,6 +392,11 @@ def logout():
 
     return redirect(url_for('front_page'))
 
+# @TODO
+# - add/remove/edit user
+# - weekday/weekend time add
+# -
+
 
 if __name__ == '__main__':
     if sys.argv[-1] == '--setup':
@@ -399,4 +404,4 @@ if __name__ == '__main__':
         raise SystemExit(0)
     else:
         print "starting"
-        app.run(host=('0.0.0.0'), port=5002, use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5000, use_reloader=False)

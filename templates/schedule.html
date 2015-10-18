@@ -12,13 +12,16 @@
     </div>
     <div class="col-sm-12">
         <div class="col-sm-2">
-            <button><a href="{{ url_for('change_pwd', username=username) }}">Change password</a></button>
+            <a class="btn-default" href="{{ url_for('change_pwd', username=username) }}">Change password</a>
         </div>
         <div class="col-sm-2">
-            <button><a href="{{ url_for('donate', username=username) }}">Add credits</a></button>
+            <a class="btn-default" href="{{ url_for('donate', username=username) }}">Add credits</a>
         </div>
         <div class="col-sm-2">
-            <button><a href="{{ url_for('debit', username=username) }}">Deduct credits</a></button>
+            <a class="btn-default" href="{{ url_for('debit', username=username) }}">Deduct credits</a>
+        </div>
+        <div class="col-sm-2">
+            <a class="btn-default" href="{{ url_for('add_replenish', username=username) }}">Add update</a>
         </div>
     </div>
 
@@ -33,7 +36,7 @@
                 </a>
                     </td>
                     <td>
-                        On {{ daynames[repl.upcoming.weekday()] }}
+                        starting {{ daynames[repl.upcoming.weekday()] }}
                         add {{ repl.amount }} minutes
                     </td>
 
