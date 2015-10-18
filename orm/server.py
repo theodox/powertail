@@ -342,8 +342,8 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def delete_replenish(self, id):
-        return Replenish.delete().where(Replenish.id == id)
-        self.log("replenish schedule deleted")
+        Replenish.delete().where(Replenish.id == id).execute()
+        self.log("replenish %i deleted" % id)
 
     def poll(self):
         """

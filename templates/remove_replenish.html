@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-        <h3>Remove update from {{ repl.user.name }} on {{ daynames[repl.upcoming.weekday()] }}</h3>
+        <h3>Remove update from {{ user }} on {{ next_day }}</h3>
 
-        <form method="post" action="add" id="mainform">
+        <form method="post"  id="mainform">
             <div class="form-horizontal">
                 <!-- update_day -->
 
@@ -29,6 +29,12 @@
                     <input type="hidden" name="username" value={{ username }}>
 
                 </div>
+            </div>
         </form>
+        <a class="btn"
+           href="{{ url_for('get_schedule', username=user) }}">
+            Cancel
+        </a>
+
     </div>
 {% endblock %}

@@ -14,6 +14,10 @@ from orm.server import PowerServer
 
 
 
+
+
+
+
 # configuration
 
 DEBUG = True
@@ -259,7 +263,7 @@ def get_schedule(username):
                            balance=user.balance,
                            replenish=replenish,
                            daynumbers=DAY_NUMS,
-                           daynames = DAY_NAMES,
+                           daynames=DAY_NAMES,
                            )
 
 
@@ -337,11 +341,11 @@ def delete_interval(interval):
 @app.route('/add_replenish/<username>', methods=['GET', 'POST'])
 def add_replenish(username):
     if request.method == 'GET':
-        return render_template('add_replenish', username=username)
+        return render_template('add_replenish.html', username=username)
 
     if not check_sys_password(request)[0]:
         error = "password"
-        return render_template('add_replenish',
+        return render_template('add_replenish.html',
                                username=username,
                                error=error)
 
@@ -353,6 +357,29 @@ def add_replenish(username):
     flash('updated schedule')
     return redirect(url_for('get_schedule', username=user))
 
+
+@app.route('/remove_replenish/<repl>', methods=['GET', 'POST'])
+def rem_repl(repl='repl'):
+    replenish_object = server.get_replenish(repl)
+    user = replenish_object.user.name
+
+    if request.method == 'GET':
+        return render_template('remove_replenish.html',
+                               user=user,
+                               next_day=DAY_NAMES[replenish_object.upcoming.weekday()],
+                               repl=repl)
+
+    if not check_sys_password(request)[0]:
+        error = "password"
+        return render_template('remove_replenish.html',
+                               user=user,
+                               next_day=DAY_NAMES[replenish_object.upcoming.weekday()],
+                               repl=repl,
+                               error=error)
+
+    server.delete_replenish(int(repl))
+    flash('deleted replenish')
+    return redirect(url_for('get_schedule', username=user))
 
 
 @app.route('/logout')
@@ -372,4 +399,4 @@ if __name__ == '__main__':
         raise SystemExit(0)
     else:
         print "starting"
-        app.run(host=('0.0.0.0'), port=5000, use_reloader=False)
+        app.run(host=('0.0.0.0'), port=5002, use_reloader=False)
