@@ -3,6 +3,7 @@ from time import sleep
 from datetime import timedelta
 from collections import namedtuple, OrderedDict
 import threading
+
 from power import PowerTail
 from orm.model import *
 
@@ -19,6 +20,7 @@ def time_difference(time1, time2):
     second = datetime.combine(datetime.today(), time2)
     return first - second
 
+_DAY_NAMES =  dict(enumerate('Mon. Tue. Wed. Th. Fri. Sat. Sun.'.split()))
 
 class PowerServer(object):
     def __init__(self, peewee_db, interval=12.0):
@@ -31,7 +33,6 @@ class PowerServer(object):
         self._last_check = None
         self._status = PowerCheck(0, 'starting', -1, timedelta(), datetime.now())
         self._lock = threading.RLock()
-
 
     @property
     def status(self):
@@ -268,12 +269,11 @@ class PowerServer(object):
 
     @PEEWEE.atomic()
     def users(self):
-        user_data = tuple( User.select().order_by(User.name))
+        user_data = tuple(User.select().order_by(User.name))
         results = OrderedDict()
         for u in user_data:
             results[u] = self.user_replenish(u.name)
         return results
-
 
     @PEEWEE.atomic()
     def user_schedule(self, user_name):
@@ -321,6 +321,20 @@ class PowerServer(object):
     def edit_interval(self, interval, new_start, new_end):
         interval.update(start=new_start, end=new_end)
         interval.save()
+
+    @PEEWEE.atomic()
+    def add_replenish(self, user_name, day=0, frequency=7, amount=60):
+        u = User.select().where(User.name == user_name).get()
+        r = Replenish.create(user=u, upcoming=datetime.now(),
+                             amount=amount, rollover=frequency)
+        today = datetime.today().weekday()
+        if day < today:
+            day += 7
+        day_delta = (day - today) * 24
+        r.upcoming = r.upcoming + timedelta(hours=day_delta)
+        r.save()
+        self.log("Will replenish %s every % days starting %s" %
+                 (user_name, frequency, _DAY_NAMES[day % 7]))
 
     def poll(self):
         """

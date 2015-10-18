@@ -28,7 +28,7 @@
             {% for repl in replenish %}
                 <tr>
                     <p>
-                        On {{ daynumbers.keys()[repl.upcoming.day] }}
+                        On {{ daynames[repl.upcoming.weekday()] }}
                         add {{ repl.amount }} minutes</p>
 
                     <p>

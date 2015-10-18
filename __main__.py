@@ -5,8 +5,10 @@ import datetime
 
 from flask import Flask, request, session, g, redirect, url_for, render_template, flash, jsonify
 
-from orm.model import User, PEEWEE, setup, Interval, Replenish
+from orm.model import User, PEEWEE, setup, Interval
 from orm.server import PowerServer
+
+
 
 
 
@@ -27,8 +29,11 @@ app.permanent_session_lifetime = timedelta(hours=5)
 manager = None
 
 # TEST CODE
-
-server = PowerServer(PEEWEE, 10)
+try:
+    server = PowerServer(PEEWEE, 10)
+except:
+    setup()
+    server = PowerServer(PEEWEE, 10)
 server.start()
 
 
@@ -45,6 +50,10 @@ day_names = "Monday Tuesday Wednesday Thursday Friday Saturday Sunday "
 DAY_NUMS = OrderedDict()
 for num, day in enumerate(day_names.split()):
     DAY_NUMS[day] = num
+
+DAY_NAMES = OrderedDict()
+for num, day in enumerate(day_names.split()):
+    DAY_NAMES[num] = day
 
 
 @app.before_request
@@ -249,7 +258,8 @@ def get_schedule(username):
                            username=username,
                            balance=user.balance,
                            replenish=replenish,
-                           daynumbers=DAY_NUMS
+                           daynumbers=DAY_NUMS,
+                           daynames = DAY_NAMES,
                            )
 
 
@@ -322,6 +332,27 @@ def delete_interval(interval):
     Interval.delete().where(Interval.id == interval).execute()
     user = request.args.get('username')
     return redirect(url_for('get_schedule', username=user))
+
+
+@app.route('/add_replenish/<username>', methods=['GET', 'POST'])
+def add_replenish(username):
+    if request.method == 'GET':
+        return render_template('add_replenish', username=username)
+
+    if not check_sys_password(request)[0]:
+        error = "password"
+        return render_template('add_replenish',
+                               username=username,
+                               error=error)
+
+    user = request.form['username']
+    amount = int(request.form['amount'])
+    rollover = int(request.form['update_frequency'])
+    day = int(request.form['update_day'])
+    server.add_replenish(user, day=day, frequency=rollover, amount=amount)
+    flash('updated schedule')
+    return redirect(url_for('get_schedule', username=user))
+
 
 
 @app.route('/logout')
