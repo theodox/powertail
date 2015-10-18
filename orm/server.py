@@ -336,6 +336,15 @@ class PowerServer(object):
         self.log("Will replenish %s every % days starting %s" %
                  (user_name, frequency, _DAY_NAMES[day % 7]))
 
+    @PEEWEE.atomic()
+    def get_replenish(self, id):
+        return Replenish.select().where(Replenish.id == id).get()
+
+    @PEEWEE.atomic()
+    def delete_replenish(self, id):
+        return Replenish.delete().where(Replenish.id == id)
+        self.log("replenish schedule deleted")
+
     def poll(self):
         """
         Update loop
