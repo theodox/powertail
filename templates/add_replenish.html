@@ -57,22 +57,8 @@
                         </div>
                     </div>
                     <!--- end freq -->
-                    <!--- password -->
-                    <div class="form-group {% if error=="password" %}has-error{% endif %}">
-                        <label class="control-label col-xs-2" for="password">System Password</label>
-
-                        <div class="col-xs-4">
-                            <div class="input-group">
-                                <input type="password" class="form-control" name="password" required="true">
-                            <span class="input-group-btn">
-                                 <input class="btn btn-default" type="submit" value=Submit>
-                                     Enter
-                                </input>
-                            </span>
-                            </div>
-                        </div>
-                    </div>
-                    <!--- password -->
+                    {% import "password_block.html" as pw %}
+                     {{ pw.password_block( error=error) }}
                     <input type="hidden" name="dayname" value={{ dayname }}>
                     <input type="hidden" name="daynum" value={{ daynum }}>
                     <input type="hidden" name="username" value={{ username }}>

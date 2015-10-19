@@ -18,6 +18,7 @@ from orm.server import PowerServer
 
 
 
+
 # configuration
 
 DEBUG = True
@@ -70,8 +71,10 @@ def before_request():
     g.minutes_remaining = server.status.time_left.seconds / 60.0
     g.shutdown_time = server.status.off_time.strftime("%I:%M %p")
     g.active_user = None
+    g.is_admin = False
     if server.active_user is not None:
         g.active_user = server.active_user.name
+        g.is_admin = server.active_user.is_admin
     g.g_time = time.strftime("%I:%M %p")
 
 
@@ -118,9 +121,8 @@ def extend():
         return render_template('extend.html', error=error)
     if request.method == 'POST':
 
-        valid, reason = check_sys_password(request)
-        if not valid:
-            error = reason
+        if not g.is_admin and not check_sys_password(request):
+            error = "Incorrect password"
             return render_template('extend.html', error=error)
 
         extra_minutes = int(request.form['amount'])
@@ -140,23 +142,28 @@ def today():
 @app.route('/direct/<username>', methods=['GET', 'POST'])
 def direct(username=None):
     error = None
+    if request.method == 'GET':
+        return render_template('login_direct.html',
+                               error=error,
+                               username=username)
     if request.method == 'POST':
         name = username
         pwd = request.form['password']
 
         valid, reason = server.validate_user(name, pwd)
 
-        if valid:
+        if not valid:
+            error = reason
+            return render_template('login_direct.html',
+                                   error=error,
+                                   username=username)
+        else:
             server.set_user(name)
             session['logged_in'] = True
             session['username'] = name
             flash('%s logged in' % name)
             server.refresh()
-
             return redirect(url_for('front_page'))
-        else:
-            error = reason
-    return render_template('login_direct.html', error=error, username=username)
 
 
 @app.route('/change_password/')
@@ -191,19 +198,18 @@ def donate(username=None):
     error = None
 
     if request.method == 'GET':
-        return render_template('donate.html', error=error, children=(username,))
+        return render_template('donate.html', error=error, user=username)
 
     elif request.method == 'POST':
 
-        if not check_sys_password(request):
+        if not g.is_admin and not check_sys_password(request):
             error = "Incorrect password"
             return render_template('donate.html',
                                    error=error,
-                                   children=(request.form['child'],),
-                                   username=request.form['child'])
+                                   user=username)
 
         extra = int(request.form['amount'])
-        user = request.form['child']
+        user = request.form['user']
         server.gift_time(user, extra)
         flash("added %s to %s" % (extra, user))
         server.refresh()
@@ -224,7 +230,7 @@ def debit(username=None):
                                    user=username)
 
         deduction = int(request.form['amount'])
-        user = request.form['child']
+        user = request.form['user']
         server.gift_time(user, -1 * deduction)
         flash("deducted %s from %s" % (deduction, user))
         server.refresh()
@@ -291,7 +297,7 @@ def create_interval(username):
         expires = request.form['expires']
         is_temp = request.form.get('is_temp') is not None
 
-        if not check_sys_password(request)[0]:
+        if not g.is_admin and not check_sys_password(request)[0]:
             error = "password"
             return render_template('add_interval.html',
                                    username=username,
@@ -343,7 +349,7 @@ def add_replenish(username):
     if request.method == 'GET':
         return render_template('add_replenish.html', username=username)
 
-    if not check_sys_password(request)[0]:
+    if not g.is_admin and not check_sys_password(request)[0]:
         error = "password"
         return render_template('add_replenish.html',
                                username=username,
@@ -369,7 +375,7 @@ def rem_repl(repl='repl'):
                                next_day=DAY_NAMES[replenish_object.upcoming.weekday()],
                                repl=repl)
 
-    if not check_sys_password(request)[0]:
+    if not g.is_admin and not check_sys_password(request)[0]:
         error = "password"
         return render_template('remove_replenish.html',
                                user=user,

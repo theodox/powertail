@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-        <h3>Deduct Time From {{ user }}</h3>
+        <h3>Deduct time to {{ user }}</h3>
 
-        <form method="post" action="donate">
+        <form method="post">
             <div class="form-horizontal">
                 <!-- amt -->
                 <div class="form-group">
@@ -22,20 +22,8 @@
                         <input name="user" value="{{ user }}" type="hidden"></div>
                 </div>
 
-                <div class="form-group {% if error=="password" %}has-error{% endif %}">
-                    <label class="control-label col-xs-2" for="password">System Password</label>
-
-                    <div class="col-xs-4">
-                        <div class="input-group">
-                            <input type="password" class="form-control" name="password" required="true">
-                            <span class="input-group-btn">
-                                 <input class="btn btn-default" type="submit" value=Deduct>
-                                     Deduct
-                                </input>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                {% import "password_block.html" as pw %}
+                {{ pw.password_block() }}
             </div>
         </form>
     </div>

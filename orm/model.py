@@ -92,7 +92,7 @@ def setup():
     nicky = User.create(name='nicky', password='nickyt2', picture='swimmer')
     nicky.save()
 
-    daddy = User.create(name='daddy', password='mommy', cap=180, picture='goggles', isadmin=True)
+    daddy = User.create(name='daddy', password='mommy', cap=180, picture='goggles', is_admin=True)
     daddy.save()
 
     print "users created"

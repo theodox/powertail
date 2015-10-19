@@ -1,32 +1,32 @@
 {% extends "layout.html" %}
 {% block body %}
-    <form method="post" action="donate">
-        <dl>
-            <dt>Add time</dt>
-            <dd>
-                Give
 
-                <select name="amount" class="input-lg">
-                    <option value="5">5 minutes</option>
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="120">2 hour</option>
-                </select>
-                to
-                <select name="child">
-                    {% for child in children %}
-                        <option value="{{ child }}">{{ child }}</option>
-                    {% endfor %}
-                </select>
-            </dd>
-        </dl>
-        <dl>
-            <dt>System password:
-            <dd><input type=password name=password>
-            <dd><input type=submit value=Login>
-        </dl>
-    </form>
-    {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    <div class="container">
+        <h3>Give time to {{ user }}</h3>
+
+        <form method="post">
+            <div class="form-horizontal">
+                <!-- amt -->
+                <div class="form-group{% if error %} has-error{% endif %}" >
+                    <label class="control-label col-xs-2" for="amounts">Give</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <select class="form-control input-lg" name="amount">
+                                <option value="5">5 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hour</option>
+                            </select>
+                        </div>
+                        <input name="user" value="{{ user }}" type="hidden"></div>
+                </div>
+
+                {% import "password_block.html" as pw %}
+                {{ pw.password_block( error=error) }}
+            </div>
+        </form>
+    </div>
 
 {% endblock %}

@@ -1,14 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
     <div class="container">
-        <form class="form-inline" method="post">
-            <div class="form-group">
-                <label class="sr-only invisible" for="pwd">Login as {{ username }}</label>
-                <input type="password" class="form-control" id="pwd" placeholder="password for {{ username }}"
-                       name="password">
-                <button type="submit" class="btn btn-default" value="Login">Sign in</button>
-            </div>
+        <form method="post">
+
+            {% import "password_block.html" as pw %}
+            {{ pw.password_block("Enter Password", login=True, error=error) }}
         </form>
-        {% if error %}<p class="bg-danger"><strong>Error:</strong> {{ error }}{% endif %}
     </div>
 {% endblock %}
