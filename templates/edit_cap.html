@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container">
+        <h3>Set maximum credits for {{ username }}</h3>
+
+        <form method="post">
+            <div class="form-horizontal">
+
+
+                <div class="form-group" >
+                    <label class="control-label col-xs-2" for="new_cap">New Cap</label>
+
+                    <div class="col-xs-4">
+                        <div class="input-group">
+                            <select class="form-control input-lg" name="new_cap">
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="90">1.5 hours</option>
+                                <option value="120">2 hours</option>
+                                <option value="150">2.5 hours</option>
+                                <option value="180">3 hours</option>
+                                <option value="240">4 hours</option>
+                                <option value="720">12 hours</option>
+                            </select>
+                        </div>
+                        <input name="user" value="{{ username }}" type="hidden"></div>
+                </div>
+
+                {% import "password_block.html" as pw %}
+                {{ pw.password_block( error=error) }}
+
+            </div>
+        </form>
+    </div>
+{% endblock %}
