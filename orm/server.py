@@ -63,6 +63,13 @@ class PowerServer(object):
             self._user = None
 
     @PEEWEE.atomic()
+    def set_cap(self, user, amount):
+        user_object = User.select().where((User.name == user)).get()
+        user_object.cap = amount
+        user_object.save()
+
+
+    @PEEWEE.atomic()
     def log(self, message, user=None):
         user = user or self._system
         msg = History.create(user=user, message=message)

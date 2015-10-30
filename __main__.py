@@ -365,7 +365,7 @@ def add_replenish(username):
 
 
 @app.route('/remove_replenish/<repl>', methods=['GET', 'POST'])
-def rem_repl(repl='repl'):
+def delete_replenish(repl='repl'):
     replenish_object = server.get_replenish(repl)
     user = replenish_object.user.name
 
@@ -385,6 +385,21 @@ def rem_repl(repl='repl'):
 
     server.delete_replenish(int(repl))
     flash('deleted replenish')
+    return redirect(url_for('get_schedule', username=user))
+
+@app.route('/edit_cap/<username>' , methods=['GET', 'POST'])
+def edit_cap(username):
+    if request.method == 'GET':
+        return render_template('edit_cap.html', username=username)
+
+    if not g.is_admin and not check_sys_password(request)[0]:
+        error = "password"
+        return render_template('edit_cap.html',
+                               username=username,
+                               error=error)
+    user = request.form['user']
+    amount = int(request.form['new_cap'])
+    server.set_cap(user, amount)
     return redirect(url_for('get_schedule', username=user))
 
 

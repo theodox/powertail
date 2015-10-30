@@ -11,8 +11,14 @@
         <div class="col-sm-2">{{ cap }} minutes</div>
     </div>
     <div class="col-sm-12">
+       <div class="col-sm-2">
+            <a class="btn-default" href="{{ url_for('change_pwd', username=username) }}">Password</a>
+        </div>
         <div class="col-sm-2">
-            <a class="btn-default" href="{{ url_for('change_pwd', username=username) }}">Change password</a>
+            <a class="btn-default" href="{{ url_for('edit_cap', username=username) }}">Cap</a>
+        </div>
+        <div class="col-sm-2">
+            <a class="btn-default" href="{{ url_for('add_replenish', username=username) }}">Updates</a>
         </div>
         <div class="col-sm-2">
             <a class="btn-default" href="{{ url_for('donate', username=username) }}">Add credits</a>
@@ -20,32 +26,37 @@
         <div class="col-sm-2">
             <a class="btn-default" href="{{ url_for('debit', username=username) }}">Deduct credits</a>
         </div>
-        <div class="col-sm-2">
-            <a class="btn-default" href="{{ url_for('add_replenish', username=username) }}">Add update</a>
-        </div>
     </div>
 
     <div class="row">
         <h3>Allowance schedule</h3>
-        <table class="table table-striped">
-            {% for repl in replenish %}
-                <tr>
-                    <td>
-                        <a class="btn" href="{{ url_for('rem_repl', repl=repl.id) }}">
-                    <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
-                </a>
-                    </td>
-                    <td>
-                        starting {{ daynames[repl.upcoming.weekday()] }}
-                        add {{ repl.amount }} minutes
-                    </td>
 
-                    <td>
-                        (update every {{ repl.rollover }} day{% if repl.rollover >1 %}s{% endif %})
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
+        {% for repl in replenish %}
+            <div class="container list-group-item">
+                <div class="row">
+                    <div class="col-sm-1">
+                        <a class="btn" href="{{ url_for('delete_replenish', repl=repl.id) }}">
+                            <span class="glyphicon glyphicon-remove text-warning" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <div class="col-sm-4">
+                        Add {{ repl.amount }} minutes on {{ daynames[repl.upcoming.weekday()] }}, update  every {{ repl.rollover }} day{% if repl.rollover >1 %}s{% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+
+        <div class="container list-group-item bg-info">
+            <div class="row">
+                <div class="col-sm-1">
+                    <a class="btn"
+                       href="{{ url_for('add_replenish', username=username, daynum=daynum, dayname=dayname) }}">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> add...
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
