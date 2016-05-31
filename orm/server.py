@@ -233,6 +233,7 @@ class PowerServer(object):
         """
         balance = self._user.balance - elapsed
         balance = round(balance, 2)
+        balance = max(balance, -1) # runtime deduction won't go below -1
         self._user.balance = balance
         self._user.save()
         return balance

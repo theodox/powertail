@@ -121,7 +121,7 @@ def extend():
         return render_template('extend.html', error=error)
     if request.method == 'POST':
 
-        if not g.is_admin and not check_sys_password(request):
+        if not check_sys_password(request):
             error = "Incorrect password"
             return render_template('extend.html', error=error)
 
@@ -202,7 +202,7 @@ def donate(username=None):
 
     elif request.method == 'POST':
 
-        if not g.is_admin and not check_sys_password(request):
+        if not check_sys_password(request):
             error = "Incorrect password"
             return render_template('donate.html',
                                    error=error,
@@ -297,7 +297,7 @@ def create_interval(username):
         expires = request.form['expires']
         is_temp = request.form.get('is_temp') is not None
 
-        if not g.is_admin and not check_sys_password(request)[0]:
+        if  not check_sys_password(request)[0]:
             error = "password"
             return render_template('add_interval.html',
                                    username=username,
@@ -349,7 +349,7 @@ def add_replenish(username):
     if request.method == 'GET':
         return render_template('add_replenish.html', username=username)
 
-    if not g.is_admin and not check_sys_password(request)[0]:
+    if not check_sys_password(request)[0]:
         error = "password"
         return render_template('add_replenish.html',
                                username=username,
@@ -375,7 +375,7 @@ def delete_replenish(repl='repl'):
                                next_day=DAY_NAMES[replenish_object.upcoming.weekday()],
                                repl=repl)
 
-    if not g.is_admin and not check_sys_password(request)[0]:
+    if not check_sys_password(request)[0]:
         error = "password"
         return render_template('remove_replenish.html',
                                user=user,
@@ -392,7 +392,7 @@ def edit_cap(username):
     if request.method == 'GET':
         return render_template('edit_cap.html', username=username)
 
-    if not g.is_admin and not check_sys_password(request)[0]:
+    if  not check_sys_password(request)[0]:
         error = "password"
         return render_template('edit_cap.html',
                                username=username,
