@@ -84,7 +84,6 @@ def teardown_request(exception):
         server.log(exception)
     PEEWEE.close()
 
-
 @app.route('/update')
 def update():
     """
