@@ -120,7 +120,7 @@ def extend():
         return render_template('extend.html', error=error)
     if request.method == 'POST':
 
-        if not check_sys_password(request):
+        if not check_sys_password(request)[0]:
             error = "Incorrect password"
             return render_template('extend.html', error=error)
 
@@ -201,7 +201,7 @@ def donate(username=None):
 
     elif request.method == 'POST':
 
-        if not check_sys_password(request):
+        if not check_sys_password(request)[0]:
             error = "Incorrect password"
             return render_template('donate.html',
                                    error=error,
@@ -222,7 +222,7 @@ def debit(username=None):
         return render_template('debit.html', error=error, user=username)
 
     elif request.method == 'POST':
-        if not check_sys_password(request):
+        if not check_sys_password(request)[0]:
             error = "Incorrect password"
             return render_template('debit.html',
                                    error=error,
