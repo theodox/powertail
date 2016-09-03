@@ -1,7 +1,7 @@
 __author__ = 'stevet'
 
 from threading import Lock
-
+PIN = 16   #pin number for the GPIO board
 
 class gpio_proxy(object):
     OUT = 1
@@ -24,7 +24,7 @@ except ImportError:
 
 # --- initializer ------
 gpio.setmode(gpio.BOARD)
-gpio.setup(12, gpio.OUT)
+gpio.setup(PIN, gpio.OUT)
 # ----------------------
 
 
@@ -51,5 +51,5 @@ class PowerTail(object):
     def enact(self):
         if self._state != self._internal_state:
             self._internal_state = self._state
-            gpio.output(12, self._internal_state)
+            gpio.output(PIN, self._internal_state)
         return self._internal_state
